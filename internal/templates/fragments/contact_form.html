@@ -1,24 +1,22 @@
 {{define "content"}}
-<div class="contact-form-container">
-    <form 
-        {{if .IsEdit}}
-            hx-put="/people/{{.PersonID}}/contacts/{{.Contact.ID}}"
-        {{else}}
-            hx-post="/people/{{.PersonID}}/contacts"
-        {{end}}
-        hx-target="#contact-form-container"
-        hx-swap="innerHTML"
-        class="contact-form">
-        
-        <div class="form-header">
-            <h3>{{if .IsEdit}}Edit Contact{{else}}Add New Contact{{end}}</h3>
-            <button 
-                type="button" 
-                onclick="document.getElementById('contact-form-container').innerHTML = ''"
-                class="btn btn-sm btn-secondary">
-                Cancel
-            </button>
-        </div>
+<form 
+    {{if .IsEdit}}
+        hx-put="/people/{{.PersonID}}/contacts/{{.Contact.ID}}"
+    {{else}}
+        hx-post="/people/{{.PersonID}}/contacts"
+    {{end}}
+    hx-target="#contact-form-container"
+    hx-swap="innerHTML"
+    class="contact-form">
+    
+    <h3>{{if .IsEdit}}Edit Contact{{else}}Add New Contact{{end}}</h3>
+    <button 
+        type="button" 
+        onclick="document.getElementById('contact-form-container').innerHTML = ''"
+        class="btn btn-sm btn-secondary"
+        style="position: absolute; top: 1rem; right: 1rem;">
+        Cancel
+    </button>
         
         <div class="form-group">
             <label for="contactTypeId">Contact Type:</label>
@@ -48,6 +46,5 @@
                 {{if .IsEdit}}Update Contact{{else}}Add Contact{{end}}
             </button>
         </div>
-    </form>
-</div>
+</form>
 {{end}}

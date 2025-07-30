@@ -49,6 +49,7 @@ func main() {
 	mux.HandleFunc("POST /people", personHandler.CreatePerson)
 	mux.HandleFunc("GET /people/{id}", personHandler.ShowPerson)
 	mux.HandleFunc("GET /people/{id}/edit", personHandler.EditPersonForm)
+	mux.HandleFunc("GET /people/{id}/edit-inline", personHandler.EditPersonInlineForm)
 	mux.HandleFunc("PUT /people/{id}", personHandler.UpdatePerson)
 	mux.HandleFunc("DELETE /people/{id}", personHandler.DeletePerson)
 

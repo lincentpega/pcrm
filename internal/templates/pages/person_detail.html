@@ -2,7 +2,6 @@
 <div class="page-header">
     <h1>Person Details</h1>
     <div class="header-actions">
-        <a href="/people/{{.Person.ID}}/edit" class="btn btn-secondary">Edit</a>
         <button 
             hx-delete="/people/{{.Person.ID}}" 
             hx-confirm="Are you sure you want to delete this person?"
@@ -13,7 +12,9 @@
 </div>
 
 <div class="person-detail">
-    <div class="detail-card">
+    <div id="person-edit-container"></div>
+    
+    <div id="person-info-section" class="detail-card">
         <div class="detail-row">
             <label>First Name:</label>
             <span>{{.Person.FirstName}}</span>
@@ -49,10 +50,20 @@
             <label>Last Updated:</label>
             <span>{{.Person.UpdatedAt.Format "January 2, 2006 at 15:04"}}</span>
         </div>
+        
+        <div class="detail-actions">
+            <button 
+                hx-get="/people/{{.Person.ID}}/edit-inline" 
+                hx-target="#person-edit-container"
+                hx-swap="innerHTML"
+                class="btn btn-sm btn-secondary">
+                Edit person info
+            </button>
+        </div>
     </div>
     
     <div class="actions">
-        <a href="/people" class="btn">Back to People</a>
+        <a href="/people" class="btn btn-default">Back to People</a>
     </div>
 </div>
 
@@ -108,4 +119,10 @@
         {{end}}
     </div>
 </div>
+
+<script>
+document.body.addEventListener('clearEditForm', function() {
+    document.getElementById('person-edit-container').innerHTML = '';
+});
+</script>
 {{end}}

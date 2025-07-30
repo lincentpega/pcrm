@@ -181,6 +181,31 @@ func (h *PersonHandler) EditPersonForm(w http.ResponseWriter, r *http.Request) {
 	h.renderer.RenderPage(w, "person_form", data)
 }
 
+func (h *PersonHandler) EditPersonInlineForm(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid person ID", http.StatusBadRequest)
+		return
+	}
+
+	person, err := h.repo.GetByID(id)
+	if err != nil {
+		http.Error(w, "Person not found", http.StatusNotFound)
+		return
+	}
+
+	data := struct {
+		Person *models.Person
+		Form   *models.PersonForm
+	}{
+		Person: person,
+		Form:   person.ToForm(),
+	}
+
+	h.renderer.RenderFragment(w, "person_edit_form", data)
+}
+
 func (h *PersonHandler) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -210,8 +235,22 @@ func (h *PersonHandler) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Header.Get("HX-Request") == "true" {
-		w.Header().Set("HX-Redirect", fmt.Sprintf("/people/%d", person.ID))
-		w.WriteHeader(http.StatusOK)
+		// Get the updated person from database to ensure we have the latest data
+		updatedPerson, err := h.repo.GetByID(person.ID)
+		if err != nil {
+			http.Error(w, "Failed to fetch updated person", http.StatusInternalServerError)
+			return
+		}
+
+		data := struct {
+			Person *models.Person
+		}{
+			Person: updatedPerson,
+		}
+
+		// Clear the edit form by setting a header to clear the container
+		w.Header().Set("HX-Trigger", "clearEditForm")
+		h.renderer.RenderFragment(w, "person_info_section", data)
 		return
 	}
 
