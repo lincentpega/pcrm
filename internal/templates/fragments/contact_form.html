@@ -1,0 +1,53 @@
+{{define "content"}}
+<div class="contact-form-container">
+    <form 
+        {{if .IsEdit}}
+            hx-put="/people/{{.PersonID}}/contacts/{{.Contact.ID}}"
+        {{else}}
+            hx-post="/people/{{.PersonID}}/contacts"
+        {{end}}
+        hx-target="#contact-form-container"
+        hx-swap="innerHTML"
+        class="contact-form">
+        
+        <div class="form-header">
+            <h3>{{if .IsEdit}}Edit Contact{{else}}Add New Contact{{end}}</h3>
+            <button 
+                type="button" 
+                onclick="document.getElementById('contact-form-container').innerHTML = ''"
+                class="btn btn-sm btn-secondary">
+                Cancel
+            </button>
+        </div>
+        
+        <div class="form-group">
+            <label for="contactTypeId">Contact Type:</label>
+            <select name="contactTypeId" id="contactTypeId" required class="form-control">
+                <option value="">Select contact type...</option>
+                {{range .ContactTypes}}
+                    <option value="{{.ID}}" {{if eq .ID $.Form.ContactTypeID}}selected{{end}}>
+                        {{.Name}}
+                    </option>
+                {{end}}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="content">Content:</label>
+            <textarea 
+                name="content" 
+                id="content" 
+                required 
+                class="form-control" 
+                rows="3" 
+                placeholder="Enter contact information...">{{.Form.Content}}</textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                {{if .IsEdit}}Update Contact{{else}}Add Contact{{end}}
+            </button>
+        </div>
+    </form>
+</div>
+{{end}}

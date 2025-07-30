@@ -1,0 +1,111 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>Person Details</h1>
+    <div class="header-actions">
+        <a href="/people/{{.Person.ID}}/edit" class="btn btn-secondary">Edit</a>
+        <button 
+            hx-delete="/people/{{.Person.ID}}" 
+            hx-confirm="Are you sure you want to delete this person?"
+            class="btn btn-danger">
+            Delete
+        </button>
+    </div>
+</div>
+
+<div class="person-detail">
+    <div class="detail-card">
+        <div class="detail-row">
+            <label>First Name:</label>
+            <span>{{.Person.FirstName}}</span>
+        </div>
+        
+        {{if .Person.SecondName.Valid}}
+        <div class="detail-row">
+            <label>Second Name:</label>
+            <span>{{.Person.SecondName.String}}</span>
+        </div>
+        {{end}}
+        
+        {{if .Person.MiddleName.Valid}}
+        <div class="detail-row">
+            <label>Middle Name:</label>
+            <span>{{.Person.MiddleName.String}}</span>
+        </div>
+        {{end}}
+        
+        {{if .Person.Birthdate.Valid}}
+        <div class="detail-row">
+            <label>Birthdate:</label>
+            <span>{{.Person.Birthdate.Time.Format "January 2, 2006"}}</span>
+        </div>
+        {{end}}
+        
+        <div class="detail-row">
+            <label>Created:</label>
+            <span>{{.Person.CreatedAt.Format "January 2, 2006 at 15:04"}}</span>
+        </div>
+        
+        <div class="detail-row">
+            <label>Last Updated:</label>
+            <span>{{.Person.UpdatedAt.Format "January 2, 2006 at 15:04"}}</span>
+        </div>
+    </div>
+    
+    <div class="actions">
+        <a href="/people" class="btn">Back to People</a>
+    </div>
+</div>
+
+<div class="contacts-section">
+    <div class="section-header">
+        <h2>Contacts</h2>
+        <button 
+            hx-get="/people/{{.Person.ID}}/contacts/new" 
+            hx-target="#contact-form-container"
+            hx-swap="innerHTML"
+            class="btn btn-primary btn-sm">
+            Add Contact
+        </button>
+    </div>
+    
+    <div id="contact-form-container"></div>
+    
+    <div id="contacts-list">
+        {{if .Contacts}}
+            <div class="contacts-grid">
+                {{range .Contacts}}
+                <div class="contact-card" id="contact-{{.ID}}">
+                    <div class="contact-header">
+                        <span class="contact-type">{{.ContactType.Name}}</span>
+                        <div class="contact-actions">
+                            <button 
+                                hx-get="/people/{{.PersonID}}/contacts/{{.ID}}/edit" 
+                                hx-target="#contact-form-container"
+                                hx-swap="innerHTML"
+                                class="btn btn-sm btn-secondary">
+                                Edit
+                            </button>
+                            <button 
+                                hx-delete="/people/{{.PersonID}}/contacts/{{.ID}}" 
+                                hx-target="#contact-{{.ID}}"
+                                hx-swap="outerHTML"
+                                hx-confirm="Are you sure you want to delete this contact?"
+                                class="btn btn-sm btn-danger">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                    <div class="contact-content">
+                        {{.Content}}
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        {{else}}
+            <div class="empty-contacts">
+                <p>No contacts added yet.</p>
+            </div>
+        {{end}}
+    </div>
+</div>
+{{end}}

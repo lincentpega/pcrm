@@ -1,0 +1,15 @@
+server:
+  port: 8080
+  host: localhost
+
+database:
+  host: localhost
+  port: 5445
+  name: pcrm
+  user: pcrm_user
+  password: pcrm_password
+  sslmode: disable
+
+logging:
+  level: info
+  format: json

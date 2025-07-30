@@ -1,0 +1,62 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>{{if .Person}}Edit Person{{else}}Add New Person{{end}}</h1>
+</div>
+
+<div class="form-container">
+    <form 
+        {{if .Person}}
+            hx-put="/people/{{.Person.ID}}"
+        {{else}}
+            hx-post="/people"
+        {{end}}
+        class="person-form">
+        
+        <div class="form-group">
+            <label for="firstName">First Name *</label>
+            <input 
+                type="text" 
+                id="firstName" 
+                name="firstName" 
+                value="{{if .Form}}{{.Form.FirstName}}{{end}}"
+                required>
+        </div>
+        
+        <div class="form-group">
+            <label for="secondName">Second Name</label>
+            <input 
+                type="text" 
+                id="secondName" 
+                name="secondName" 
+                value="{{if .Form}}{{.Form.SecondName}}{{end}}">
+        </div>
+        
+        <div class="form-group">
+            <label for="middleName">Middle Name</label>
+            <input 
+                type="text" 
+                id="middleName" 
+                name="middleName" 
+                value="{{if .Form}}{{.Form.MiddleName}}{{end}}">
+        </div>
+        
+        <div class="form-group">
+            <label for="birthdate">Birthdate</label>
+            <input 
+                type="date" 
+                id="birthdate" 
+                name="birthdate" 
+                value="{{if .Form}}{{.Form.Birthdate}}{{end}}">
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                {{if .Person}}Update Person{{else}}Create Person{{end}}
+            </button>
+            <a href="{{if .Person}}/people/{{.Person.ID}}{{else}}/people{{end}}" class="btn btn-secondary">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{{end}}

@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pcrm_postgres
+    environment:
+      POSTGRES_DB: pcrm
+      POSTGRES_USER: pcrm_user
+      POSTGRES_PASSWORD: pcrm_password
+    ports:
+      - "5445:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
