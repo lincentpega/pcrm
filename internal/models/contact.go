@@ -19,23 +19,3 @@ type Contact struct {
 	UpdatedAt     time.Time   `json:"updatedAt" db:"updated_at"`
 	ContactType   ContactType `json:"contactType" db:"contact_type"`
 }
-
-type ContactForm struct {
-	ContactTypeID int64  `json:"contactTypeId"`
-	Content       string `json:"content"`
-}
-
-func (f *ContactForm) ToContact(personID int64) *Contact {
-	return &Contact{
-		PersonID:      personID,
-		ContactTypeID: f.ContactTypeID,
-		Content:       f.Content,
-	}
-}
-
-func (c *Contact) ToForm() *ContactForm {
-	return &ContactForm{
-		ContactTypeID: c.ContactTypeID,
-		Content:       c.Content,
-	}
-}

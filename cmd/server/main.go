@@ -1,19 +1,22 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/justinas/alice"
 	httpSwagger "github.com/swaggo/http-swagger"
-	
+
+	_ "github.com/lincentpega/pcrm/docs"
 	"github.com/lincentpega/pcrm/internal/config"
-	"github.com/lincentpega/pcrm/internal/handlers"
 	"github.com/lincentpega/pcrm/internal/handlers/api"
 	"github.com/lincentpega/pcrm/internal/middleware"
 	"github.com/lincentpega/pcrm/internal/repository"
-	"github.com/lincentpega/pcrm/internal/templates"
-	_ "github.com/lincentpega/pcrm/docs"
 )
 
 // @title Personal CRM API
@@ -43,12 +46,9 @@ func main() {
 	}
 	defer db.Close()
 
-	renderer := templates.NewRenderer()
 	personRepo := repository.NewPersonRepository(db)
 	contactRepo := repository.NewContactRepository(db)
-	personHandler := handlers.NewPersonHandler(personRepo, contactRepo, renderer)
-	contactHandler := handlers.NewContactHandler(contactRepo, renderer)
-	
+
 	personAPI := api.NewPersonAPI(personRepo, contactRepo)
 	contactAPI := api.NewContactAPI(contactRepo)
 
@@ -60,32 +60,15 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
-
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/people", http.StatusSeeOther)
 	})
-
-	mux.HandleFunc("GET /people", personHandler.ListPeople)
-	mux.HandleFunc("GET /people/new", personHandler.NewPersonForm)
-	mux.HandleFunc("POST /people", personHandler.CreatePerson)
-	mux.HandleFunc("GET /people/{id}", personHandler.ShowPerson)
-	mux.HandleFunc("GET /people/{id}/edit", personHandler.EditPersonForm)
-	mux.HandleFunc("GET /people/{id}/edit-inline", personHandler.EditPersonInlineForm)
-	mux.HandleFunc("PUT /people/{id}", personHandler.UpdatePerson)
-	mux.HandleFunc("DELETE /people/{id}", personHandler.DeletePerson)
-
-	mux.HandleFunc("GET /people/{personId}/contacts/new", contactHandler.NewContactForm)
-	mux.HandleFunc("POST /people/{personId}/contacts", contactHandler.CreateContact)
-	mux.HandleFunc("GET /people/{personId}/contacts/{contactId}/edit", contactHandler.EditContactForm)
-	mux.HandleFunc("PUT /people/{personId}/contacts/{contactId}", contactHandler.UpdateContact)
-	mux.HandleFunc("DELETE /people/{personId}/contacts/{contactId}", contactHandler.DeleteContact)
 
 	// REST API routes
 	mux.HandleFunc("GET /api/people", personAPI.ListPeople)
 	mux.HandleFunc("POST /api/people", personAPI.CreatePerson)
 	mux.HandleFunc("GET /api/people/{id}", personAPI.GetPerson)
-	mux.HandleFunc("GET /api/people/{id}/full", personAPI.GetPersonWithContacts)
+	mux.HandleFunc("GET /api/people/{id}/full", personAPI.GetPersonFullInfo)
 	mux.HandleFunc("PUT /api/people/{id}", personAPI.UpdatePerson)
 	mux.HandleFunc("DELETE /api/people/{id}", personAPI.DeletePerson)
 
@@ -101,8 +84,33 @@ func main() {
 
 	handler := middlewareChain.Then(mux)
 
-	log.Printf("Starting server on %s", cfg.Address())
-	if err := http.ListenAndServe(cfg.Address(), handler); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	server := &http.Server{
+		Addr:         cfg.Address(),
+		Handler:      handler,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
+
+	go func() {
+		log.Printf("Starting server on %s", cfg.Address())
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server failed to start: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("Server forced to shutdown: %v", err)
+	}
+
+	log.Println("Server exited")
 }

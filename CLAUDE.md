@@ -22,11 +22,15 @@ pcrm/
 │   └── server/           # Application entrypoint
 ├── internal/
 │   ├── config/           # Configuration management
-│   ├── handlers/         # HTTP handlers
+│   ├── dto/              # API contracts (request/response structures)
+│   ├── handlers/         # HTTP handlers (orchestration layer)
+│   ├── mappers/          # Data transformation between layers
 │   ├── middleware/       # HTTP middleware
-│   ├── models/           # Data models
+│   ├── models/           # Domain models
 │   ├── repository/       # Database operations
-│   └── templates/        # HTML templates
+│   ├── services/         # Business logic
+│   ├── templates/        # HTML templates
+│   └── validators/       # Input validation logic
 ├── migrations/           # Database migrations
 ├── static/              # Static assets (CSS, JS, images)
 ├── docker-compose.yml   # Development infrastructure
@@ -68,6 +72,26 @@ The application uses YAML configuration with environment-specific overrides loca
 - HTMX responses should return HTML fragments when possible
 - Use Alice for clean middleware chaining
 - Prefer explicit error handling over panics
+
+## Architecture Principles
+
+### Separation of Concerns
+- **DTOs**: API contracts only, no business logic
+- **Validators**: Pure validation functions, no data transformation
+- **Mappers**: Data transformation between layers only
+- **Services**: Business logic only, no DTOs or HTTP concerns
+- **Handlers**: HTTP orchestration only, delegate to other layers
+
+### Layer Boundaries
+- Handlers → DTOs → Mappers → Domain Models → Services
+- No circular dependencies between layers
+- Each package has single responsibility
+
+### Domain-Driven Design
+- Models represent business domain
+- Services contain business rules and logic
+- DTOs are transport contracts, not domain objects
+- Clear separation between API and domain concerns
 
 ## Code Style Guidelines
 

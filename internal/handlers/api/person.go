@@ -3,11 +3,11 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
-	"time"
 
-	"github.com/lincentpega/pcrm/internal/models"
+	"github.com/lincentpega/pcrm/internal/dto"
+	"github.com/lincentpega/pcrm/internal/mappers"
 	"github.com/lincentpega/pcrm/internal/repository"
+	"github.com/lincentpega/pcrm/internal/validators"
 )
 
 type PersonAPI struct {
@@ -22,49 +22,6 @@ func NewPersonAPI(repo *repository.PersonRepository, contactRepo *repository.Con
 	}
 }
 
-type PersonRequest struct {
-	FirstName  string     `json:"firstName" validate:"required"`
-	SecondName *string    `json:"secondName,omitempty"`
-	MiddleName *string    `json:"middleName,omitempty"`
-	Birthdate  *time.Time `json:"birthdate,omitempty"`
-}
-
-type PersonResponse struct {
-	ID         int64      `json:"id" binding:"required"`
-	FirstName  string     `json:"firstName" binding:"required"`
-	SecondName *string    `json:"secondName,omitempty"`
-	MiddleName *string    `json:"middleName,omitempty"`
-	Birthdate  *time.Time `json:"birthdate,omitempty"`
-	CreatedAt  time.Time  `json:"createdAt" binding:"required"`
-	UpdatedAt  time.Time  `json:"updatedAt" binding:"required"`
-}
-
-type PersonWithContactsResponse struct {
-	PersonResponse
-	Contacts []ContactResponse `json:"contacts"`
-}
-
-func (req *PersonRequest) ToPerson() *models.Person {
-	return &models.Person{
-		FirstName:  req.FirstName,
-		SecondName: req.SecondName,
-		MiddleName: req.MiddleName,
-		Birthdate:  req.Birthdate,
-	}
-}
-
-func PersonToResponse(person *models.Person) PersonResponse {
-	return PersonResponse{
-		ID:         person.ID,
-		FirstName:  person.FirstName,
-		SecondName: person.SecondName,
-		MiddleName: person.MiddleName,
-		Birthdate:  person.Birthdate,
-		CreatedAt:  person.CreatedAt,
-		UpdatedAt:  person.UpdatedAt,
-	}
-}
-
 // ListPeople godoc
 // @Summary List people with pagination
 // @Description Get a paginated list of all people in the CRM
@@ -73,24 +30,14 @@ func PersonToResponse(person *models.Person) PersonResponse {
 // @Produce json
 // @Param page query int false "Page number" default(1)
 // @Param limit query int false "Items per page" default(10)
-// @Success 200 {object} PaginatedResponse[PersonResponse]
+// @Success 200 {object} PaginatedResponse[PersonInfoResponse]
 // @Failure 500 {object} ErrorResponse
 // @Router /api/people [get]
 func (api *PersonAPI) ListPeople(w http.ResponseWriter, r *http.Request) {
-	page := 1
-	limit := 10
-
-	if pageStr := r.URL.Query().Get("page"); pageStr != "" {
-		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
-			page = p
-		}
-	}
-
-	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
-		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 100 {
-			limit = l
-		}
-	}
+	page, limit := validators.ParsePaginationParams(
+		r.URL.Query().Get("page"),
+		r.URL.Query().Get("limit"),
+	)
 
 	people, err := api.repo.GetPaginated(page, limit)
 	if err != nil {
@@ -106,9 +53,9 @@ func (api *PersonAPI) ListPeople(w http.ResponseWriter, r *http.Request) {
 
 	totalPages := (totalCount + limit - 1) / limit
 
-	response := make([]PersonResponse, len(people))
+	response := make([]dto.PersonInfoResponse, len(people))
 	for i, person := range people {
-		response[i] = PersonToResponse(&person)
+		response[i] = mappers.PersonDomainToResponse(&person)
 	}
 
 	WritePaginated(w, response, page, totalPages, totalCount)
@@ -126,10 +73,9 @@ func (api *PersonAPI) ListPeople(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {object} ErrorResponse
 // @Router /api/people/{id} [get]
 func (api *PersonAPI) GetPerson(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
+	id, err := validators.ValidatePersonID(r.PathValue("id"))
 	if err != nil {
-		WriteBadRequest(w, "Invalid person ID")
+		WriteBadRequest(w, err.Error())
 		return
 	}
 
@@ -139,13 +85,13 @@ func (api *PersonAPI) GetPerson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := PersonToResponse(person)
+	response := mappers.PersonDomainToResponse(person)
 	WriteSuccess(w, response)
 }
 
-// GetPersonWithContacts godoc
-// @Summary Get a person with all their contacts
-// @Description Get detailed information about a person including all their contact information
+// GetPersonFullInfo godoc
+// @Summary Get complete person information
+// @Description Get detailed information about a person including all related data (contacts, etc.)
 // @Tags people
 // @Accept json
 // @Produce json
@@ -155,11 +101,10 @@ func (api *PersonAPI) GetPerson(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/people/{id}/full [get]
-func (api *PersonAPI) GetPersonWithContacts(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
+func (api *PersonAPI) GetPersonFullInfo(w http.ResponseWriter, r *http.Request) {
+	id, err := validators.ValidatePersonID(r.PathValue("id"))
 	if err != nil {
-		WriteBadRequest(w, "Invalid person ID")
+		WriteBadRequest(w, err.Error())
 		return
 	}
 
@@ -175,15 +120,7 @@ func (api *PersonAPI) GetPersonWithContacts(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	response := PersonWithContactsResponse{
-		PersonResponse: PersonToResponse(person),
-		Contacts:       make([]ContactResponse, len(contacts)),
-	}
-
-	for i, contact := range contacts {
-		response.Contacts[i] = ContactToResponse(&contact)
-	}
-
+	response := mappers.PersonWithContactsDomainToResponse(person, contacts)
 	WriteSuccess(w, response)
 }
 
@@ -199,24 +136,24 @@ func (api *PersonAPI) GetPersonWithContacts(w http.ResponseWriter, r *http.Reque
 // @Failure 500 {object} ErrorResponse
 // @Router /api/people [post]
 func (api *PersonAPI) CreatePerson(w http.ResponseWriter, r *http.Request) {
-	var req PersonRequest
+	var req dto.PersonUpsertRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		WriteBadRequest(w, "Invalid JSON format")
 		return
 	}
 
-	if req.FirstName == "" {
-		WriteBadRequest(w, "First name is required")
+	if err := validators.ValidatePersonUpsertRequest(&req); err != nil {
+		WriteBadRequest(w, err.Error())
 		return
 	}
 
-	person := req.ToPerson()
+	person := mappers.PersonUpsertRequestToDomain(&req)
 	if err := api.repo.Create(person); err != nil {
 		WriteInternalError(w, "Failed to create person")
 		return
 	}
 
-	response := PersonToResponse(person)
+	response := mappers.PersonDomainToResponse(person)
 	WriteCreated(w, response)
 }
 
@@ -233,25 +170,24 @@ func (api *PersonAPI) CreatePerson(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} ErrorResponse
 // @Router /api/people/{id} [put]
 func (api *PersonAPI) UpdatePerson(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
+	id, err := validators.ValidatePersonID(r.PathValue("id"))
 	if err != nil {
-		WriteBadRequest(w, "Invalid person ID")
+		WriteBadRequest(w, err.Error())
 		return
 	}
 
-	var req PersonRequest
+	var req dto.PersonUpsertRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		WriteBadRequest(w, "Invalid JSON format")
 		return
 	}
 
-	if req.FirstName == "" {
-		WriteBadRequest(w, "First name is required")
+	if err := validators.ValidatePersonUpsertRequest(&req); err != nil {
+		WriteBadRequest(w, err.Error())
 		return
 	}
 
-	person := req.ToPerson()
+	person := mappers.PersonUpsertRequestToDomain(&req)
 	person.ID = id
 
 	if err := api.repo.Update(person); err != nil {
@@ -265,7 +201,7 @@ func (api *PersonAPI) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := PersonToResponse(updatedPerson)
+	response := mappers.PersonDomainToResponse(updatedPerson)
 	WriteSuccess(w, response)
 }
 
@@ -281,10 +217,9 @@ func (api *PersonAPI) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} ErrorResponse
 // @Router /api/people/{id} [delete]
 func (api *PersonAPI) DeletePerson(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
+	id, err := validators.ValidatePersonID(r.PathValue("id"))
 	if err != nil {
-		WriteBadRequest(w, "Invalid person ID")
+		WriteBadRequest(w, err.Error())
 		return
 	}
 
