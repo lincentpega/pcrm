@@ -1,6 +1,8 @@
 package mappers
 
 import (
+	"time"
+
 	"github.com/lincentpega/pcrm/internal/dto"
 	"github.com/lincentpega/pcrm/internal/models"
 	"github.com/lincentpega/pcrm/internal/services"
@@ -52,4 +54,21 @@ func PersonWithContactsDomainToResponse(person *models.Person, contacts []models
 	}
 
 	return response
+}
+
+func PersonBirthdateRequestToDomain(personID int64, req *dto.PersonBirthdateRequest) *models.Person {
+	var approximateAgeUpdatedAt *time.Time
+	if req.ApproximateAge != nil {
+		now := time.Now()
+		approximateAgeUpdatedAt = &now
+	}
+
+	return &models.Person{
+		ID:                      personID,
+		BirthYear:               req.BirthYear,
+		BirthMonth:              req.BirthMonth,
+		BirthDay:                req.BirthDay,
+		ApproximateAge:          req.ApproximateAge,
+		ApproximateAgeUpdatedAt: approximateAgeUpdatedAt,
+	}
 }

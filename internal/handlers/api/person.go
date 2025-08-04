@@ -130,8 +130,8 @@ func (api *PersonAPI) GetPersonFullInfo(w http.ResponseWriter, r *http.Request) 
 // @Tags people
 // @Accept json
 // @Produce json
-// @Param person body PersonRequest true "Person data"
-// @Success 201 {object} PersonResponse
+// @Param person body PersonUpsertRequest true "Person data"
+// @Success 201 {object} PersonInfoResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/people [post]
@@ -164,9 +164,10 @@ func (api *PersonAPI) CreatePerson(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Person ID"
-// @Param person body PersonRequest true "Updated person data"
-// @Success 200 {object} PersonResponse
+// @Param person body PersonUpsertRequest true "Updated person data"
+// @Success 200 {object} PersonInfoResponse
 // @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/people/{id} [put]
 func (api *PersonAPI) UpdatePerson(w http.ResponseWriter, r *http.Request) {
@@ -197,7 +198,53 @@ func (api *PersonAPI) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 
 	updatedPerson, err := api.repo.GetByID(id)
 	if err != nil {
-		WriteInternalError(w, "Failed to fetch updated person")
+		WriteNotFound(w, "Person not found")
+		return
+	}
+
+	response := mappers.PersonDomainToResponse(updatedPerson)
+	WriteSuccess(w, response)
+}
+
+// UpsertPersonBirthdate godoc
+// @Summary Update person birth date information
+// @Description Set or update birth date information for a person (exact date, partial date, approximate age, or clear)
+// @Tags people
+// @Accept json
+// @Produce json
+// @Param id path int true "Person ID"
+// @Param birthdate body PersonBirthdateRequest true "Birth date data"
+// @Success 200 {object} PersonInfoResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/people/{id}/birthdate [put]
+func (api *PersonAPI) UpsertPersonBirthdate(w http.ResponseWriter, r *http.Request) {
+	id, err := validators.ValidatePersonID(r.PathValue("id"))
+	if err != nil {
+		WriteBadRequest(w, err.Error())
+		return
+	}
+
+	var req dto.PersonBirthdateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		WriteBadRequest(w, "Invalid JSON format")
+		return
+	}
+
+	if err := validators.ValidateBirthdateRequest(&req); err != nil {
+		WriteBadRequest(w, err.Error())
+		return
+	}
+
+	if err := api.repo.UpdateBirthdate(id, &req); err != nil {
+		WriteInternalError(w, "Failed to update birth date")
+		return
+	}
+
+	updatedPerson, err := api.repo.GetByID(id)
+	if err != nil {
+		WriteNotFound(w, "Person not found")
 		return
 	}
 

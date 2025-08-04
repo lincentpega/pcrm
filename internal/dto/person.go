@@ -8,6 +8,13 @@ type PersonUpsertRequest struct {
 	MiddleName *string `json:"middleName,omitempty"`
 }
 
+type PersonBirthdateRequest struct {
+	BirthYear      *int `json:"birthYear,omitempty"`
+	BirthMonth     *int `json:"birthMonth,omitempty"`
+	BirthDay       *int `json:"birthDay,omitempty"`
+	ApproximateAge *int `json:"approximateAge,omitempty"`
+}
+
 type PersonInfoResponse struct {
 	ID                 int64     `json:"id" binding:"required"`
 	FirstName          string    `json:"firstName" binding:"required"`
