@@ -20,24 +20,24 @@
             <span>{{.Person.FirstName}}</span>
         </div>
         
-        {{if .Person.SecondName.Valid}}
+        {{if .Person.SecondName}}
         <div class="detail-row">
             <label>Second Name:</label>
-            <span>{{.Person.SecondName.String}}</span>
+            <span>{{.Person.SecondName}}</span>
         </div>
         {{end}}
         
-        {{if .Person.MiddleName.Valid}}
+        {{if .Person.MiddleName}}
         <div class="detail-row">
             <label>Middle Name:</label>
-            <span>{{.Person.MiddleName.String}}</span>
+            <span>{{.Person.MiddleName}}</span>
         </div>
         {{end}}
         
-        {{if .Person.Birthdate.Valid}}
+        {{if .Person.Birthdate}}
         <div class="detail-row">
             <label>Birthdate:</label>
-            <span>{{.Person.Birthdate.Time.Format "January 2, 2006"}}</span>
+            <span>{{.Person.Birthdate.Format "January 2, 2006"}}</span>
         </div>
         {{end}}
         

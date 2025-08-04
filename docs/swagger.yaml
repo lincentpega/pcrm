@@ -1,0 +1,498 @@
+basePath: /
+definitions:
+  api.ContactRequest:
+    properties:
+      contactTypeId:
+        type: integer
+      content:
+        type: string
+    required:
+    - contactTypeId
+    - content
+    type: object
+  api.ContactResponse:
+    properties:
+      contactType:
+        $ref: '#/definitions/api.ContactTypeResponse'
+      contactTypeId:
+        type: integer
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      personId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  api.ContactTypeResponse:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  api.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  api.PaginatedResponse-api_PersonResponse:
+    properties:
+      currentPage:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/api.PersonResponse'
+        type: array
+      hasNext:
+        type: boolean
+      hasPrev:
+        type: boolean
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  api.PersonRequest:
+    properties:
+      birthdate:
+        type: string
+      firstName:
+        type: string
+      middleName:
+        type: string
+      secondName:
+        type: string
+    required:
+    - firstName
+    type: object
+  api.PersonResponse:
+    properties:
+      birthdate:
+        type: string
+      createdAt:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      middleName:
+        type: string
+      secondName:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - createdAt
+    - firstName
+    - id
+    - updatedAt
+    type: object
+  api.PersonWithContactsResponse:
+    properties:
+      birthdate:
+        type: string
+      contacts:
+        items:
+          $ref: '#/definitions/api.ContactResponse'
+        type: array
+      createdAt:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      middleName:
+        type: string
+      secondName:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - createdAt
+    - firstName
+    - id
+    - updatedAt
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: A personal CRM application with REST API endpoints alongside HTMX SSR
+    interface
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Personal CRM API
+  version: "1.0"
+paths:
+  /api/contact-types:
+    get:
+      consumes:
+      - application/json
+      description: Get all available contact types (email, phone, etc.)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.ContactTypeResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: List all contact types
+      tags:
+      - contact-types
+  /api/contacts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a contact from the system
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Delete a contact
+      tags:
+      - contacts
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific contact
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ContactResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Get a contact by ID
+      tags:
+      - contacts
+    put:
+      consumes:
+      - application/json
+      description: Update an existing contact's information
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated contact data
+        in: body
+        name: contact
+        required: true
+        schema:
+          $ref: '#/definitions/api.ContactRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ContactResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Update a contact
+      tags:
+      - contacts
+  /api/people:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of all people in the CRM
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.PaginatedResponse-api_PersonResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: List people with pagination
+      tags:
+      - people
+    post:
+      consumes:
+      - application/json
+      description: Create a new person in the CRM system
+      parameters:
+      - description: Person data
+        in: body
+        name: person
+        required: true
+        schema:
+          $ref: '#/definitions/api.PersonRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.PersonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Create a new person
+      tags:
+      - people
+  /api/people/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a person from the CRM system
+      parameters:
+      - description: Person ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Delete a person
+      tags:
+      - people
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific person
+      parameters:
+      - description: Person ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.PersonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Get a person by ID
+      tags:
+      - people
+    put:
+      consumes:
+      - application/json
+      description: Update an existing person's information
+      parameters:
+      - description: Person ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated person data
+        in: body
+        name: person
+        required: true
+        schema:
+          $ref: '#/definitions/api.PersonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.PersonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Update a person
+      tags:
+      - people
+  /api/people/{id}/full:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a person including all their contact
+        information
+      parameters:
+      - description: Person ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.PersonWithContactsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Get a person with all their contacts
+      tags:
+      - people
+  /api/people/{personId}/contacts:
+    get:
+      consumes:
+      - application/json
+      description: Get all contacts associated with a specific person
+      parameters:
+      - description: Person ID
+        in: path
+        name: personId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.ContactResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: List contacts for a person
+      tags:
+      - contacts
+    post:
+      consumes:
+      - application/json
+      description: Create a new contact for a specific person
+      parameters:
+      - description: Person ID
+        in: path
+        name: personId
+        required: true
+        type: integer
+      - description: Contact data
+        in: body
+        name: contact
+        required: true
+        schema:
+          $ref: '#/definitions/api.ContactRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.ContactResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Create a new contact
+      tags:
+      - contacts
+swagger: "2.0"

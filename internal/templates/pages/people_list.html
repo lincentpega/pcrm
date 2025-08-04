@@ -22,13 +22,13 @@
                         <td>
                             <div class="person-name">
                                 <strong>{{.FirstName}}</strong>
-                                {{if .SecondName.Valid}}{{.SecondName.String}}{{end}}
-                                {{if .MiddleName.Valid}}{{.MiddleName.String}}{{end}}
+                                {{if .SecondName}}{{.SecondName}}{{end}}
+                                {{if .MiddleName}}{{.MiddleName}}{{end}}
                             </div>
                         </td>
                         <td>
-                            {{if .Birthdate.Valid}}
-                                {{.Birthdate.Time.Format "2006-01-02"}}
+                            {{if .Birthdate}}
+                                {{.Birthdate.Format "2006-01-02"}}
                             {{else}}
                                 -
                             {{end}}

@@ -5,12 +5,31 @@ import (
 	"net/http"
 
 	"github.com/justinas/alice"
+	httpSwagger "github.com/swaggo/http-swagger"
+	
 	"github.com/lincentpega/pcrm/internal/config"
 	"github.com/lincentpega/pcrm/internal/handlers"
+	"github.com/lincentpega/pcrm/internal/handlers/api"
 	"github.com/lincentpega/pcrm/internal/middleware"
 	"github.com/lincentpega/pcrm/internal/repository"
 	"github.com/lincentpega/pcrm/internal/templates"
+	_ "github.com/lincentpega/pcrm/docs"
 )
+
+// @title Personal CRM API
+// @version 1.0
+// @description A personal CRM application with REST API endpoints alongside HTMX SSR interface
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8080
+// @BasePath /
 
 func main() {
 	cfg, err := config.Load("config.yml")
@@ -29,6 +48,9 @@ func main() {
 	contactRepo := repository.NewContactRepository(db)
 	personHandler := handlers.NewPersonHandler(personRepo, contactRepo, renderer)
 	contactHandler := handlers.NewContactHandler(contactRepo, renderer)
+	
+	personAPI := api.NewPersonAPI(personRepo, contactRepo)
+	contactAPI := api.NewContactAPI(contactRepo)
 
 	middlewareChain := alice.New(
 		middleware.LoggingMiddleware,
@@ -58,6 +80,24 @@ func main() {
 	mux.HandleFunc("GET /people/{personId}/contacts/{contactId}/edit", contactHandler.EditContactForm)
 	mux.HandleFunc("PUT /people/{personId}/contacts/{contactId}", contactHandler.UpdateContact)
 	mux.HandleFunc("DELETE /people/{personId}/contacts/{contactId}", contactHandler.DeleteContact)
+
+	// REST API routes
+	mux.HandleFunc("GET /api/people", personAPI.ListPeople)
+	mux.HandleFunc("POST /api/people", personAPI.CreatePerson)
+	mux.HandleFunc("GET /api/people/{id}", personAPI.GetPerson)
+	mux.HandleFunc("GET /api/people/{id}/full", personAPI.GetPersonWithContacts)
+	mux.HandleFunc("PUT /api/people/{id}", personAPI.UpdatePerson)
+	mux.HandleFunc("DELETE /api/people/{id}", personAPI.DeletePerson)
+
+	mux.HandleFunc("GET /api/people/{personId}/contacts", contactAPI.ListContactsByPerson)
+	mux.HandleFunc("POST /api/people/{personId}/contacts", contactAPI.CreateContact)
+	mux.HandleFunc("GET /api/contacts/{id}", contactAPI.GetContact)
+	mux.HandleFunc("PUT /api/contacts/{id}", contactAPI.UpdateContact)
+	mux.HandleFunc("DELETE /api/contacts/{id}", contactAPI.DeleteContact)
+	mux.HandleFunc("GET /api/contact-types", contactAPI.ListContactTypes)
+
+	// Swagger documentation
+	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)
 
 	handler := middlewareChain.Then(mux)
 
