@@ -89,40 +89,6 @@ func (api *PersonAPI) GetPerson(w http.ResponseWriter, r *http.Request) {
 	WriteSuccess(w, response)
 }
 
-// GetPersonFullInfo godoc
-// @Summary Get complete person information
-// @Description Get detailed information about a person including all related data (contacts, etc.)
-// @Tags people
-// @Accept json
-// @Produce json
-// @Param id path int true "Person ID"
-// @Success 200 {object} dto.PersonWithContactsResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/people/{id}/full [get]
-func (api *PersonAPI) GetPersonFullInfo(w http.ResponseWriter, r *http.Request) {
-	id, err := validators.ValidatePersonID(r.PathValue("id"))
-	if err != nil {
-		WriteBadRequest(w, err.Error())
-		return
-	}
-
-	person, err := api.repo.GetByID(id)
-	if err != nil {
-		WriteNotFound(w, "Person not found")
-		return
-	}
-
-	contacts, err := api.contactRepo.GetByPersonID(id)
-	if err != nil {
-		WriteInternalError(w, "Failed to fetch contacts")
-		return
-	}
-
-	response := mappers.PersonWithContactsDomainToResponse(person, contacts)
-	WriteSuccess(w, response)
-}
 
 // CreatePerson godoc
 // @Summary Create a new person

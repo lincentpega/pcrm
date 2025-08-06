@@ -72,7 +72,6 @@ func main() {
 	mux.HandleFunc("GET /api/people", personAPI.ListPeople)
 	mux.HandleFunc("POST /api/people", personAPI.CreatePerson)
 	mux.HandleFunc("GET /api/people/{id}", personAPI.GetPerson)
-	mux.HandleFunc("GET /api/people/{id}/full", personAPI.GetPersonFullInfo)
 	mux.HandleFunc("PUT /api/people/{id}", personAPI.UpdatePerson)
 	mux.HandleFunc("DELETE /api/people/{id}", personAPI.DeletePerson)
 
