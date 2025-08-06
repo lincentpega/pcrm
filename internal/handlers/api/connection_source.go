@@ -30,7 +30,7 @@ func NewConnectionSourceAPI(repo *repository.ConnectionSourceRepository, personR
 // @Accept json
 // @Produce json
 // @Param personId path int true "Person ID"
-// @Success 200 {object} ConnectionSourceResponse
+// @Success 200 {object} dto.ConnectionSourceResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/people/{personId}/connection-source [get]
@@ -69,9 +69,9 @@ func (api *ConnectionSourceAPI) GetConnectionSource(w http.ResponseWriter, r *ht
 // @Accept json
 // @Produce json
 // @Param personId path int true "Person ID"
-// @Param connectionSource body ConnectionSourceRequest true "Connection source data"
-// @Success 200 {object} ConnectionSourceResponse "Updated"
-// @Success 201 {object} ConnectionSourceResponse "Created"
+// @Param connectionSource body dto.ConnectionSourceRequest true "Connection source data"
+// @Success 200 {object} dto.ConnectionSourceResponse "Updated"
+// @Success 201 {object} dto.ConnectionSourceResponse "Created"
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -101,7 +101,7 @@ func (api *ConnectionSourceAPI) UpsertConnectionSource(w http.ResponseWriter, r 
 		return
 	}
 
-	connectionSource := mappers.ConnectionSourceRequestToDomain(personID, &req)
+	connectionSource := mappers.dto.ConnectionSourceRequestToDomain(personID, &req)
 
 	// Check if connection source already exists to determine status code
 	existingConnectionSource, err := api.repo.GetByPersonID(personID)

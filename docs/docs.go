@@ -229,7 +229,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.PaginatedResponse-api_PersonResponse"
+                            "$ref": "#/definitions/api.PaginatedResponse-dto_PersonInfoResponse"
                         }
                     },
                     "500": {
@@ -259,7 +259,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.PersonRequest"
+                            "$ref": "#/definitions/dto.PersonUpsertRequest"
                         }
                     }
                 ],
@@ -267,7 +267,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.PersonResponse"
+                            "$ref": "#/definitions/dto.PersonInfoResponse"
                         }
                     },
                     "400": {
@@ -311,7 +311,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.PersonResponse"
+                            "$ref": "#/definitions/dto.PersonInfoResponse"
                         }
                     },
                     "400": {
@@ -354,7 +354,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.PersonRequest"
+                            "$ref": "#/definitions/dto.PersonUpsertRequest"
                         }
                     }
                 ],
@@ -362,11 +362,17 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.PersonResponse"
+                            "$ref": "#/definitions/dto.PersonInfoResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/api.ErrorResponse"
                         }
@@ -421,7 +427,7 @@ const docTemplate = `{
         },
         "/api/people/{id}/full": {
             "get": {
-                "description": "Get detailed information about a person including all their contact information",
+                "description": "Get detailed information about a person including all related data (contacts, etc.)",
                 "consumes": [
                     "application/json"
                 ],
@@ -431,7 +437,7 @@ const docTemplate = `{
                 "tags": [
                     "people"
                 ],
-                "summary": "Get a person with all their contacts",
+                "summary": "Get complete person information",
                 "parameters": [
                     {
                         "type": "integer",
@@ -445,8 +451,312 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.PersonWithContactsResponse"
+                            "$ref": "#/definitions/dto.PersonWithContactsResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/people/{personId}/birth-date-info": {
+            "get": {
+                "description": "Get the birth date information for a specific person",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "birth-date-info"
+                ],
+                "summary": "Get birth date info for a person",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Person ID",
+                        "name": "personId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BirthDateInfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Create or update the birth date information for a specific person",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "birth-date-info"
+                ],
+                "summary": "Create or update birth date info",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Person ID",
+                        "name": "personId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Birth date info data",
+                        "name": "birthDateInfo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BirthDateInfoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BirthDateInfoResponse"
+                        }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BirthDateInfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete the birth date information for a specific person",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "birth-date-info"
+                ],
+                "summary": "Delete birth date info",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Person ID",
+                        "name": "personId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/people/{personId}/connection-source": {
+            "get": {
+                "description": "Get the connection source information for how we met a specific person",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "connection-sources"
+                ],
+                "summary": "Get connection source for a person",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Person ID",
+                        "name": "personId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ConnectionSourceResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Create or update the connection source information for how we met a specific person",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "connection-sources"
+                ],
+                "summary": "Create or update connection source",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Person ID",
+                        "name": "personId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Connection source data",
+                        "name": "connectionSource",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ConnectionSourceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ConnectionSourceResponse"
+                        }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ConnectionSourceResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete the connection source information for a specific person",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "connection-sources"
+                ],
+                "summary": "Delete connection source",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Person ID",
+                        "name": "personId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -632,7 +942,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.PaginatedResponse-api_PersonResponse": {
+        "api.PaginatedResponse-dto_PersonInfoResponse": {
             "type": "object",
             "properties": {
                 "currentPage": {
@@ -641,7 +951,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.PersonResponse"
+                        "$ref": "#/definitions/dto.PersonInfoResponse"
                     }
                 },
                 "hasNext": {
@@ -658,27 +968,145 @@ const docTemplate = `{
                 }
             }
         },
-        "api.PersonRequest": {
+        "dto.BirthDateInfoRequest": {
             "type": "object",
-            "required": [
-                "firstName"
-            ],
             "properties": {
-                "birthdate": {
+                "approximateAge": {
+                    "type": "integer"
+                },
+                "birthDay": {
+                    "type": "integer"
+                },
+                "birthMonth": {
+                    "type": "integer"
+                },
+                "birthYear": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.BirthDateInfoResponse": {
+            "type": "object",
+            "properties": {
+                "approximateAge": {
+                    "type": "integer"
+                },
+                "approximateAgeUpdatedAt": {
                     "type": "string"
                 },
-                "firstName": {
+                "birthDay": {
+                    "type": "integer"
+                },
+                "birthMonth": {
+                    "type": "integer"
+                },
+                "birthYear": {
+                    "type": "integer"
+                },
+                "createdAt": {
                     "type": "string"
                 },
-                "middleName": {
-                    "type": "string"
+                "id": {
+                    "type": "integer"
                 },
-                "secondName": {
+                "personId": {
+                    "type": "integer"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
         },
-        "api.PersonResponse": {
+        "dto.ConnectionSourceRequest": {
+            "type": "object",
+            "properties": {
+                "introducerName": {
+                    "type": "string"
+                },
+                "introducerPersonId": {
+                    "type": "integer"
+                },
+                "meetingStory": {
+                    "type": "string"
+                },
+                "meetingTimestamp": {
+                    "type": "string"
+                },
+                "wasIntroduced": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.ConnectionSourceResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "introducerName": {
+                    "type": "string"
+                },
+                "introducerPersonId": {
+                    "type": "integer"
+                },
+                "meetingStory": {
+                    "type": "string"
+                },
+                "meetingTimestamp": {
+                    "type": "string"
+                },
+                "personId": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "wasIntroduced": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.ContactResponse": {
+            "type": "object",
+            "properties": {
+                "contactType": {
+                    "$ref": "#/definitions/dto.ContactTypeResponse"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "personId": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ContactTypeResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PersonInfoResponse": {
             "type": "object",
             "required": [
                 "createdAt",
@@ -687,9 +1115,6 @@ const docTemplate = `{
                 "updatedAt"
             ],
             "properties": {
-                "birthdate": {
-                    "type": "string"
-                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -710,7 +1135,21 @@ const docTemplate = `{
                 }
             }
         },
-        "api.PersonWithContactsResponse": {
+        "dto.PersonUpsertRequest": {
+            "type": "object",
+            "properties": {
+                "firstName": {
+                    "type": "string"
+                },
+                "middleName": {
+                    "type": "string"
+                },
+                "secondName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PersonWithContactsResponse": {
             "type": "object",
             "required": [
                 "createdAt",
@@ -719,13 +1158,10 @@ const docTemplate = `{
                 "updatedAt"
             ],
             "properties": {
-                "birthdate": {
-                    "type": "string"
-                },
                 "contacts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.ContactResponse"
+                        "$ref": "#/definitions/dto.ContactResponse"
                     }
                 },
                 "createdAt": {

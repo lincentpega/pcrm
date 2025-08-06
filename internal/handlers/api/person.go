@@ -30,7 +30,7 @@ func NewPersonAPI(repo *repository.PersonRepository, contactRepo *repository.Con
 // @Produce json
 // @Param page query int false "Page number" default(1)
 // @Param limit query int false "Items per page" default(10)
-// @Success 200 {object} PaginatedResponse[PersonInfoResponse]
+// @Success 200 {object} PaginatedResponse[dto.PersonInfoResponse]
 // @Failure 500 {object} ErrorResponse
 // @Router /api/people [get]
 func (api *PersonAPI) ListPeople(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +68,7 @@ func (api *PersonAPI) ListPeople(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Person ID"
-// @Success 200 {object} PersonResponse
+// @Success 200 {object} dto.PersonInfoResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/people/{id} [get]
@@ -96,7 +96,7 @@ func (api *PersonAPI) GetPerson(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Person ID"
-// @Success 200 {object} PersonWithContactsResponse
+// @Success 200 {object} dto.PersonWithContactsResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -130,8 +130,8 @@ func (api *PersonAPI) GetPersonFullInfo(w http.ResponseWriter, r *http.Request) 
 // @Tags people
 // @Accept json
 // @Produce json
-// @Param person body PersonUpsertRequest true "Person data"
-// @Success 201 {object} PersonInfoResponse
+// @Param person body dto.PersonUpsertRequest true "Person data"
+// @Success 201 {object} dto.PersonInfoResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/people [post]
@@ -164,8 +164,8 @@ func (api *PersonAPI) CreatePerson(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Person ID"
-// @Param person body PersonUpsertRequest true "Updated person data"
-// @Success 200 {object} PersonInfoResponse
+// @Param person body dto.PersonUpsertRequest true "Updated person data"
+// @Success 200 {object} dto.PersonInfoResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse

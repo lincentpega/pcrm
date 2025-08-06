@@ -30,7 +30,7 @@ func NewBirthDateInfoAPI(repo *repository.BirthDateInfoRepository, personRepo *r
 // @Accept json
 // @Produce json
 // @Param personId path int true "Person ID"
-// @Success 200 {object} BirthDateInfoResponse
+// @Success 200 {object} dto.BirthDateInfoResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/people/{personId}/birth-date-info [get]
@@ -69,9 +69,9 @@ func (api *BirthDateInfoAPI) GetBirthDateInfo(w http.ResponseWriter, r *http.Req
 // @Accept json
 // @Produce json
 // @Param personId path int true "Person ID"
-// @Param birthDateInfo body BirthDateInfoRequest true "Birth date info data"
-// @Success 200 {object} BirthDateInfoResponse "Updated"
-// @Success 201 {object} BirthDateInfoResponse "Created"
+// @Param birthDateInfo body dto.BirthDateInfoRequest true "Birth date info data"
+// @Success 200 {object} dto.BirthDateInfoResponse "Updated"
+// @Success 201 {object} dto.BirthDateInfoResponse "Created"
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse

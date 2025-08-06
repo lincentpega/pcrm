@@ -41,13 +41,13 @@ definitions:
       error:
         type: string
     type: object
-  api.PaginatedResponse-api_PersonResponse:
+  api.PaginatedResponse-dto_PersonInfoResponse:
     properties:
       currentPage:
         type: integer
       data:
         items:
-          $ref: '#/definitions/api.PersonResponse'
+          $ref: '#/definitions/dto.PersonInfoResponse'
         type: array
       hasNext:
         type: boolean
@@ -58,23 +58,98 @@ definitions:
       totalPages:
         type: integer
     type: object
-  api.PersonRequest:
+  dto.BirthDateInfoRequest:
     properties:
-      birthdate:
-        type: string
-      firstName:
-        type: string
-      middleName:
-        type: string
-      secondName:
-        type: string
-    required:
-    - firstName
+      approximateAge:
+        type: integer
+      birthDay:
+        type: integer
+      birthMonth:
+        type: integer
+      birthYear:
+        type: integer
     type: object
-  api.PersonResponse:
+  dto.BirthDateInfoResponse:
     properties:
-      birthdate:
+      approximateAge:
+        type: integer
+      approximateAgeUpdatedAt:
         type: string
+      birthDay:
+        type: integer
+      birthMonth:
+        type: integer
+      birthYear:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      personId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  dto.ConnectionSourceRequest:
+    properties:
+      introducerName:
+        type: string
+      introducerPersonId:
+        type: integer
+      meetingStory:
+        type: string
+      meetingTimestamp:
+        type: string
+      wasIntroduced:
+        type: boolean
+    type: object
+  dto.ConnectionSourceResponse:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      introducerName:
+        type: string
+      introducerPersonId:
+        type: integer
+      meetingStory:
+        type: string
+      meetingTimestamp:
+        type: string
+      personId:
+        type: integer
+      updatedAt:
+        type: string
+      wasIntroduced:
+        type: boolean
+    type: object
+  dto.ContactResponse:
+    properties:
+      contactType:
+        $ref: '#/definitions/dto.ContactTypeResponse'
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      personId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  dto.ContactTypeResponse:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dto.PersonInfoResponse:
+    properties:
       createdAt:
         type: string
       firstName:
@@ -93,13 +168,20 @@ definitions:
     - id
     - updatedAt
     type: object
-  api.PersonWithContactsResponse:
+  dto.PersonUpsertRequest:
     properties:
-      birthdate:
+      firstName:
         type: string
+      middleName:
+        type: string
+      secondName:
+        type: string
+    type: object
+  dto.PersonWithContactsResponse:
+    properties:
       contacts:
         items:
-          $ref: '#/definitions/api.ContactResponse'
+          $ref: '#/definitions/dto.ContactResponse'
         type: array
       createdAt:
         type: string
@@ -270,7 +352,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.PaginatedResponse-api_PersonResponse'
+            $ref: '#/definitions/api.PaginatedResponse-dto_PersonInfoResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -288,14 +370,14 @@ paths:
         name: person
         required: true
         schema:
-          $ref: '#/definitions/api.PersonRequest'
+          $ref: '#/definitions/dto.PersonUpsertRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/api.PersonResponse'
+            $ref: '#/definitions/dto.PersonInfoResponse'
         "400":
           description: Bad Request
           schema:
@@ -350,7 +432,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.PersonResponse'
+            $ref: '#/definitions/dto.PersonInfoResponse'
         "400":
           description: Bad Request
           schema:
@@ -377,16 +459,20 @@ paths:
         name: person
         required: true
         schema:
-          $ref: '#/definitions/api.PersonRequest'
+          $ref: '#/definitions/dto.PersonUpsertRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.PersonResponse'
+            $ref: '#/definitions/dto.PersonInfoResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/api.ErrorResponse'
         "500":
@@ -400,8 +486,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get detailed information about a person including all their contact
-        information
+      description: Get detailed information about a person including all related data
+        (contacts, etc.)
       parameters:
       - description: Person ID
         in: path
@@ -414,7 +500,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.PersonWithContactsResponse'
+            $ref: '#/definitions/dto.PersonWithContactsResponse'
         "400":
           description: Bad Request
           schema:
@@ -427,9 +513,213 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/api.ErrorResponse'
-      summary: Get a person with all their contacts
+      summary: Get complete person information
       tags:
       - people
+  /api/people/{personId}/birth-date-info:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the birth date information for a specific person
+      parameters:
+      - description: Person ID
+        in: path
+        name: personId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Delete birth date info
+      tags:
+      - birth-date-info
+    get:
+      consumes:
+      - application/json
+      description: Get the birth date information for a specific person
+      parameters:
+      - description: Person ID
+        in: path
+        name: personId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BirthDateInfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Get birth date info for a person
+      tags:
+      - birth-date-info
+    put:
+      consumes:
+      - application/json
+      description: Create or update the birth date information for a specific person
+      parameters:
+      - description: Person ID
+        in: path
+        name: personId
+        required: true
+        type: integer
+      - description: Birth date info data
+        in: body
+        name: birthDateInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BirthDateInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated
+          schema:
+            $ref: '#/definitions/dto.BirthDateInfoResponse'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.BirthDateInfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Create or update birth date info
+      tags:
+      - birth-date-info
+  /api/people/{personId}/connection-source:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the connection source information for a specific person
+      parameters:
+      - description: Person ID
+        in: path
+        name: personId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Delete connection source
+      tags:
+      - connection-sources
+    get:
+      consumes:
+      - application/json
+      description: Get the connection source information for how we met a specific
+        person
+      parameters:
+      - description: Person ID
+        in: path
+        name: personId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ConnectionSourceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Get connection source for a person
+      tags:
+      - connection-sources
+    put:
+      consumes:
+      - application/json
+      description: Create or update the connection source information for how we met
+        a specific person
+      parameters:
+      - description: Person ID
+        in: path
+        name: personId
+        required: true
+        type: integer
+      - description: Connection source data
+        in: body
+        name: connectionSource
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ConnectionSourceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated
+          schema:
+            $ref: '#/definitions/dto.ConnectionSourceResponse'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ConnectionSourceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Create or update connection source
+      tags:
+      - connection-sources
   /api/people/{personId}/contacts:
     get:
       consumes:
