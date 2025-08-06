@@ -124,30 +124,6 @@ definitions:
       wasIntroduced:
         type: boolean
     type: object
-  dto.ContactResponse:
-    properties:
-      contactType:
-        $ref: '#/definitions/dto.ContactTypeResponse'
-      content:
-        type: string
-      createdAt:
-        type: string
-      id:
-        type: integer
-      personId:
-        type: integer
-      updatedAt:
-        type: string
-    type: object
-  dto.ContactTypeResponse:
-    properties:
-      createdAt:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
   dto.PersonInfoResponse:
     properties:
       createdAt:
@@ -176,30 +152,6 @@ definitions:
         type: string
       secondName:
         type: string
-    type: object
-  dto.PersonWithContactsResponse:
-    properties:
-      contacts:
-        items:
-          $ref: '#/definitions/dto.ContactResponse'
-        type: array
-      createdAt:
-        type: string
-      firstName:
-        type: string
-      id:
-        type: integer
-      middleName:
-        type: string
-      secondName:
-        type: string
-      updatedAt:
-        type: string
-    required:
-    - createdAt
-    - firstName
-    - id
-    - updatedAt
     type: object
 host: localhost:8080
 info:
@@ -480,40 +432,6 @@ paths:
           schema:
             $ref: '#/definitions/api.ErrorResponse'
       summary: Update a person
-      tags:
-      - people
-  /api/people/{id}/full:
-    get:
-      consumes:
-      - application/json
-      description: Get detailed information about a person including all related data
-        (contacts, etc.)
-      parameters:
-      - description: Person ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.PersonWithContactsResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/api.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/api.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/api.ErrorResponse'
-      summary: Get complete person information
       tags:
       - people
   /api/people/{personId}/birth-date-info:

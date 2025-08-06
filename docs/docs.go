@@ -425,56 +425,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/people/{id}/full": {
-            "get": {
-                "description": "Get detailed information about a person including all related data (contacts, etc.)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "people"
-                ],
-                "summary": "Get complete person information",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Person ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.PersonWithContactsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/api.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/api.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/api.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/api/people/{personId}/birth-date-info": {
             "get": {
                 "description": "Get the birth date information for a specific person",
@@ -1069,43 +1019,6 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ContactResponse": {
-            "type": "object",
-            "properties": {
-                "contactType": {
-                    "$ref": "#/definitions/dto.ContactTypeResponse"
-                },
-                "content": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "personId": {
-                    "type": "integer"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.ContactTypeResponse": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "dto.PersonInfoResponse": {
             "type": "object",
             "required": [
@@ -1145,41 +1058,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "secondName": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.PersonWithContactsResponse": {
-            "type": "object",
-            "required": [
-                "createdAt",
-                "firstName",
-                "id",
-                "updatedAt"
-            ],
-            "properties": {
-                "contacts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.ContactResponse"
-                    }
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "secondName": {
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }

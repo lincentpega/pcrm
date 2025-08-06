@@ -113,7 +113,7 @@ func (api *BirthDateInfoAPI) UpsertBirthDateInfo(w http.ResponseWriter, r *http.
 	}
 
 	response := mappers.BirthDateInfoDomainToResponse(birthDateInfo)
-	
+
 	if isUpdate {
 		WriteSuccess(w, response)
 	} else {
