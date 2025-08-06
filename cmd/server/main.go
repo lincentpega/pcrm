@@ -48,9 +48,11 @@ func main() {
 
 	personRepo := repository.NewPersonRepository(db)
 	contactRepo := repository.NewContactRepository(db)
+	connectionSourceRepo := repository.NewConnectionSourceRepository(db)
 
 	personAPI := api.NewPersonAPI(personRepo, contactRepo)
 	contactAPI := api.NewContactAPI(contactRepo)
+	connectionSourceAPI := api.NewConnectionSourceAPI(connectionSourceRepo, personRepo)
 
 	middlewareChain := alice.New(
 		middleware.LoggingMiddleware,
@@ -79,6 +81,10 @@ func main() {
 	mux.HandleFunc("PUT /api/contacts/{id}", contactAPI.UpdateContact)
 	mux.HandleFunc("DELETE /api/contacts/{id}", contactAPI.DeleteContact)
 	mux.HandleFunc("GET /api/contact-types", contactAPI.ListContactTypes)
+
+	mux.HandleFunc("GET /api/people/{personId}/connection-source", connectionSourceAPI.GetConnectionSource)
+	mux.HandleFunc("PUT /api/people/{personId}/connection-source", connectionSourceAPI.UpsertConnectionSource)
+	mux.HandleFunc("DELETE /api/people/{personId}/connection-source", connectionSourceAPI.DeleteConnectionSource)
 
 	// Swagger documentation
 	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)

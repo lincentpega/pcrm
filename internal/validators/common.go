@@ -152,3 +152,25 @@ func parseDate(year, month, day int) (bool, error) {
 func isLeapYear(year int) bool {
 	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
 }
+
+func ValidateConnectionSourceRequest(req *dto.ConnectionSourceRequest) error {
+	if req.IntroducerPersonID != nil && req.IntroducerName != nil {
+		return errors.New("cannot specify both introducer_person_id and introducer_name")
+	}
+	
+	if req.WasIntroduced != nil && *req.WasIntroduced {
+		if req.IntroducerPersonID == nil && req.IntroducerName == nil {
+			return errors.New("when was_introduced is true, either introducer_person_id or introducer_name must be provided")
+		}
+	}
+	
+	if req.IntroducerPersonID != nil && *req.IntroducerPersonID <= 0 {
+		return errors.New("introducer_person_id must be positive")
+	}
+	
+	if req.IntroducerName != nil && *req.IntroducerName == "" {
+		return errors.New("introducer_name cannot be empty")
+	}
+	
+	return nil
+}

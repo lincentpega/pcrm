@@ -36,3 +36,18 @@ CREATE TABLE contacts (
 
 CREATE INDEX idx_contacts_person_id ON contacts(person_id);
 CREATE INDEX idx_contacts_contact_type_id ON contacts(contact_type_id);
+
+CREATE TABLE connection_sources (
+    id BIGSERIAL PRIMARY KEY,
+    person_id BIGINT NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+    meeting_story TEXT,
+    meeting_timestamp TIMESTAMP,
+    was_introduced BOOLEAN,
+    introducer_person_id BIGINT REFERENCES people(id) ON DELETE SET NULL,
+    introducer_name VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE connection_sources ADD CONSTRAINT uk_connection_sources_person_id UNIQUE (person_id);
+CREATE INDEX idx_connection_sources_introducer_person_id ON connection_sources(introducer_person_id);
