@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -25,6 +27,9 @@ func (r *ConnectionSourceRepository) GetByPersonID(personID int64) (*models.Conn
 	`
 	
 	if err := r.db.Get(&connectionSource, query, personID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("failed to get connection source for person %d: %w", personID, err)
 	}
 	

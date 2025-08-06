@@ -468,7 +468,13 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get the birth date information for a specific person
+      description: |-
+        Get the birth date information for a specific person
+
+        **Response Logic:**
+        - 200 with data: Person exists and has birth date info
+        - 200 with null: Person exists but no birth date info recorded
+        - 404: Person doesn't exist
       parameters:
       - description: Person ID
         in: path
@@ -479,15 +485,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.BirthDateInfoResponse'
+          description: Person exists but no birth date info
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/api.ErrorResponse'
         "404":
-          description: Not Found
+          description: Person not found
           schema:
             $ref: '#/definitions/api.ErrorResponse'
       summary: Get birth date info for a person
@@ -569,8 +573,13 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get the connection source information for how we met a specific
-        person
+      description: |-
+        Get the connection source information for how we met a specific person
+
+        **Response Logic:**
+        - 200 with data: Person exists and has connection source info
+        - 200 with null: Person exists but no connection source info recorded
+        - 404: Person doesn't exist
       parameters:
       - description: Person ID
         in: path
@@ -581,15 +590,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.ConnectionSourceResponse'
+          description: Person exists but no connection source info
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/api.ErrorResponse'
         "404":
-          description: Not Found
+          description: Person not found
           schema:
             $ref: '#/definitions/api.ErrorResponse'
       summary: Get connection source for a person

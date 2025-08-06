@@ -427,7 +427,7 @@ const docTemplate = `{
         },
         "/api/people/{personId}/birth-date-info": {
             "get": {
-                "description": "Get the birth date information for a specific person",
+                "description": "Get the birth date information for a specific person\n\n**Response Logic:**\n- 200 with data: Person exists and has birth date info\n- 200 with null: Person exists but no birth date info recorded\n- 404: Person doesn't exist",
                 "consumes": [
                     "application/json"
                 ],
@@ -449,10 +449,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.BirthDateInfoResponse"
-                        }
+                        "description": "Person exists but no birth date info"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -461,7 +458,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "Person not found",
                         "schema": {
                             "$ref": "#/definitions/api.ErrorResponse"
                         }
@@ -579,7 +576,7 @@ const docTemplate = `{
         },
         "/api/people/{personId}/connection-source": {
             "get": {
-                "description": "Get the connection source information for how we met a specific person",
+                "description": "Get the connection source information for how we met a specific person\n\n**Response Logic:**\n- 200 with data: Person exists and has connection source info\n- 200 with null: Person exists but no connection source info recorded\n- 404: Person doesn't exist",
                 "consumes": [
                     "application/json"
                 ],
@@ -601,10 +598,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ConnectionSourceResponse"
-                        }
+                        "description": "Person exists but no connection source info"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -613,7 +607,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "Person not found",
                         "schema": {
                             "$ref": "#/definitions/api.ErrorResponse"
                         }

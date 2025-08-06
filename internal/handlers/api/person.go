@@ -81,6 +81,10 @@ func (api *PersonAPI) GetPerson(w http.ResponseWriter, r *http.Request) {
 
 	person, err := api.repo.GetByID(id)
 	if err != nil {
+		WriteInternalError(w, "Failed to fetch person")
+		return
+	}
+	if person == nil {
 		WriteNotFound(w, "Person not found")
 		return
 	}
@@ -164,6 +168,10 @@ func (api *PersonAPI) UpdatePerson(w http.ResponseWriter, r *http.Request) {
 
 	updatedPerson, err := api.repo.GetByID(id)
 	if err != nil {
+		WriteInternalError(w, "Failed to fetch updated person")
+		return
+	}
+	if updatedPerson == nil {
 		WriteNotFound(w, "Person not found")
 		return
 	}

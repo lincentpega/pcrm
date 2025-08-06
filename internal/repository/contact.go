@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -55,6 +57,9 @@ func (r *ContactRepository) GetByID(id int64) (*models.Contact, error) {
 	`
 	
 	if err := r.db.Get(&contact, query, id); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("failed to get contact by id %d: %w", id, err)
 	}
 	

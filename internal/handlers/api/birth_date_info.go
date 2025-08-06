@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"encoding/json"
 	"net/http"
 
@@ -26,13 +25,19 @@ func NewBirthDateInfoAPI(repo *repository.BirthDateInfoRepository, personRepo *r
 // GetBirthDateInfo godoc
 // @Summary Get birth date info for a person
 // @Description Get the birth date information for a specific person
+// @Description
+// @Description **Response Logic:**
+// @Description - 200 with data: Person exists and has birth date info
+// @Description - 200 with null: Person exists but no birth date info recorded
+// @Description - 404: Person doesn't exist
 // @Tags birth-date-info
 // @Accept json
 // @Produce json
 // @Param personId path int true "Person ID"
-// @Success 200 {object} dto.BirthDateInfoResponse
+// @Success 200 {object} dto.BirthDateInfoResponse "Person exists and has birth date info"
+// @Success 200 {object} nil "Person exists but no birth date info"
 // @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse "Person not found"
 // @Router /api/people/{personId}/birth-date-info [get]
 func (api *BirthDateInfoAPI) GetBirthDateInfo(w http.ResponseWriter, r *http.Request) {
 	personID, err := validators.ValidatePersonID(r.PathValue("personId"))
@@ -42,19 +47,24 @@ func (api *BirthDateInfoAPI) GetBirthDateInfo(w http.ResponseWriter, r *http.Req
 	}
 
 	// Check if person exists
-	_, err = api.personRepo.GetByID(personID)
+	person, err := api.personRepo.GetByID(personID)
 	if err != nil {
+		WriteInternalError(w, "Failed to fetch person")
+		return
+	}
+	if person == nil {
 		WriteNotFound(w, "Person not found")
 		return
 	}
 
 	birthDateInfo, err := api.repo.GetByPersonID(personID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			WriteNotFound(w, "Birth date info not found")
-			return
-		}
 		WriteInternalError(w, "Failed to fetch birth date info")
+		return
+	}
+
+	if birthDateInfo == nil {
+		WriteJSON(w, http.StatusOK, nil)
 		return
 	}
 
@@ -84,8 +94,12 @@ func (api *BirthDateInfoAPI) UpsertBirthDateInfo(w http.ResponseWriter, r *http.
 	}
 
 	// Check if person exists
-	_, err = api.personRepo.GetByID(personID)
+	person, err := api.personRepo.GetByID(personID)
 	if err != nil {
+		WriteInternalError(w, "Failed to fetch person")
+		return
+	}
+	if person == nil {
 		WriteNotFound(w, "Person not found")
 		return
 	}
@@ -141,8 +155,12 @@ func (api *BirthDateInfoAPI) DeleteBirthDateInfo(w http.ResponseWriter, r *http.
 	}
 
 	// Check if person exists
-	_, err = api.personRepo.GetByID(personID)
+	person, err := api.personRepo.GetByID(personID)
 	if err != nil {
+		WriteInternalError(w, "Failed to fetch person")
+		return
+	}
+	if person == nil {
 		WriteNotFound(w, "Person not found")
 		return
 	}

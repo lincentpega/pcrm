@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"encoding/json"
 	"net/http"
 
@@ -26,13 +25,19 @@ func NewConnectionSourceAPI(repo *repository.ConnectionSourceRepository, personR
 // GetConnectionSource godoc
 // @Summary Get connection source for a person
 // @Description Get the connection source information for how we met a specific person
+// @Description
+// @Description **Response Logic:**
+// @Description - 200 with data: Person exists and has connection source info
+// @Description - 200 with null: Person exists but no connection source info recorded
+// @Description - 404: Person doesn't exist
 // @Tags connection-sources
 // @Accept json
 // @Produce json
 // @Param personId path int true "Person ID"
-// @Success 200 {object} dto.ConnectionSourceResponse
+// @Success 200 {object} dto.ConnectionSourceResponse "Person exists and has connection source info"
+// @Success 200 {object} nil "Person exists but no connection source info"
 // @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse "Person not found"
 // @Router /api/people/{personId}/connection-source [get]
 func (api *ConnectionSourceAPI) GetConnectionSource(w http.ResponseWriter, r *http.Request) {
 	personID, err := validators.ValidatePersonID(r.PathValue("personId"))
@@ -42,19 +47,24 @@ func (api *ConnectionSourceAPI) GetConnectionSource(w http.ResponseWriter, r *ht
 	}
 
 	// Check if person exists
-	_, err = api.personRepo.GetByID(personID)
+	person, err := api.personRepo.GetByID(personID)
 	if err != nil {
+		WriteInternalError(w, "Failed to fetch person")
+		return
+	}
+	if person == nil {
 		WriteNotFound(w, "Person not found")
 		return
 	}
 
 	connectionSource, err := api.repo.GetByPersonID(personID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			WriteNotFound(w, "Connection source not found")
-			return
-		}
 		WriteInternalError(w, "Failed to fetch connection source")
+		return
+	}
+
+	if connectionSource == nil {
+		WriteJSON(w, http.StatusOK, nil)
 		return
 	}
 
@@ -84,8 +94,12 @@ func (api *ConnectionSourceAPI) UpsertConnectionSource(w http.ResponseWriter, r 
 	}
 
 	// Check if person exists
-	_, err = api.personRepo.GetByID(personID)
+	person, err := api.personRepo.GetByID(personID)
 	if err != nil {
+		WriteInternalError(w, "Failed to fetch person")
+		return
+	}
+	if person == nil {
 		WriteNotFound(w, "Person not found")
 		return
 	}
@@ -141,8 +155,12 @@ func (api *ConnectionSourceAPI) DeleteConnectionSource(w http.ResponseWriter, r 
 	}
 
 	// Check if person exists
-	_, err = api.personRepo.GetByID(personID)
+	person, err := api.personRepo.GetByID(personID)
 	if err != nil {
+		WriteInternalError(w, "Failed to fetch person")
+		return
+	}
+	if person == nil {
 		WriteNotFound(w, "Person not found")
 		return
 	}
