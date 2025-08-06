@@ -52,9 +52,12 @@ When developing application instance of an app is already running with air, so t
 
 When running some application-related commands first check Makefile content, there might be some command already pre-defined for you
 
+## Build Guidelines
+- It's possible to build project with make build command
+
 ## Key Design Decisions
 
-- **No external router**: Using Go 1.22+ built-in routing improvements
+- **No external router**: Using Go 1.22+ routing improvements
 - **Server-side rendering**: HTMX + html/template for dynamic UI without heavy JavaScript
 - **Minimal dependencies**: Prefer standard library where possible
 - **Simple structure**: Avoiding over-engineering patterns like DDD for this scale

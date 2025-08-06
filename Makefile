@@ -1,4 +1,4 @@
-.PHONY: init run migrate tidy install-air install-swag swagger-gen
+.PHONY: init run migrate tidy install-air install-swag swagger-gen build
 
 init: tidy install-air install-swag
 	@echo "Project initialized successfully"
@@ -18,6 +18,10 @@ install-swag:
 swagger-gen:
 	@echo "Generating Swagger documentation..."
 	swag init -g cmd/server/main.go -o docs/
+
+build: tidy swagger-gen
+	@echo "Building the application..."
+	go build -o bin/server ./cmd/server
 
 migrate:
 	@echo "Running database migrations..."

@@ -101,7 +101,7 @@ func (api *ConnectionSourceAPI) UpsertConnectionSource(w http.ResponseWriter, r 
 		return
 	}
 
-	connectionSource := mappers.dto.ConnectionSourceRequestToDomain(personID, &req)
+	connectionSource := mappers.ConnectionSourceRequestToDomain(personID, &req)
 
 	// Check if connection source already exists to determine status code
 	existingConnectionSource, err := api.repo.GetByPersonID(personID)
