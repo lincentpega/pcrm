@@ -49,10 +49,12 @@ func main() {
 	personRepo := repository.NewPersonRepository(db)
 	contactRepo := repository.NewContactRepository(db)
 	connectionSourceRepo := repository.NewConnectionSourceRepository(db)
+	birthDateInfoRepo := repository.NewBirthDateInfoRepository(db)
 
 	personAPI := api.NewPersonAPI(personRepo, contactRepo)
 	contactAPI := api.NewContactAPI(contactRepo)
 	connectionSourceAPI := api.NewConnectionSourceAPI(connectionSourceRepo, personRepo)
+	birthDateInfoAPI := api.NewBirthDateInfoAPI(birthDateInfoRepo, personRepo)
 
 	middlewareChain := alice.New(
 		middleware.LoggingMiddleware,
@@ -72,7 +74,6 @@ func main() {
 	mux.HandleFunc("GET /api/people/{id}", personAPI.GetPerson)
 	mux.HandleFunc("GET /api/people/{id}/full", personAPI.GetPersonFullInfo)
 	mux.HandleFunc("PUT /api/people/{id}", personAPI.UpdatePerson)
-	mux.HandleFunc("PUT /api/people/{id}/birthdate", personAPI.UpsertPersonBirthdate)
 	mux.HandleFunc("DELETE /api/people/{id}", personAPI.DeletePerson)
 
 	mux.HandleFunc("GET /api/people/{personId}/contacts", contactAPI.ListContactsByPerson)
@@ -85,6 +86,10 @@ func main() {
 	mux.HandleFunc("GET /api/people/{personId}/connection-source", connectionSourceAPI.GetConnectionSource)
 	mux.HandleFunc("PUT /api/people/{personId}/connection-source", connectionSourceAPI.UpsertConnectionSource)
 	mux.HandleFunc("DELETE /api/people/{personId}/connection-source", connectionSourceAPI.DeleteConnectionSource)
+
+	mux.HandleFunc("GET /api/people/{personId}/birth-date-info", birthDateInfoAPI.GetBirthDateInfo)
+	mux.HandleFunc("PUT /api/people/{personId}/birth-date-info", birthDateInfoAPI.UpsertBirthDateInfo)
+	mux.HandleFunc("DELETE /api/people/{personId}/birth-date-info", birthDateInfoAPI.DeleteBirthDateInfo)
 
 	// Swagger documentation
 	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)

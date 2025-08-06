@@ -30,6 +30,29 @@ func FormatBirthDateInfo(person *models.Person) string {
 	return "Age unknown"
 }
 
+func FormatBirthDateFromInfo(birthDateInfo *models.BirthDateInfo) string {
+	if birthDateInfo.BirthYear != nil && birthDateInfo.BirthMonth != nil && birthDateInfo.BirthDay != nil {
+		return fmt.Sprintf("%d %s %d", 
+			*birthDateInfo.BirthDay,
+			getMonthName(*birthDateInfo.BirthMonth), 
+			*birthDateInfo.BirthYear)
+	}
+
+	if birthDateInfo.BirthMonth != nil && birthDateInfo.BirthDay != nil {
+		return fmt.Sprintf("%d %s", 
+			*birthDateInfo.BirthDay,
+			getMonthName(*birthDateInfo.BirthMonth))
+	}
+
+	if birthDateInfo.ApproximateAge != nil && birthDateInfo.ApproximateAgeUpdatedAt != nil {
+		yearsPassed := calculateYearsPassed(*birthDateInfo.ApproximateAgeUpdatedAt, time.Now())
+		currentApproximateAge := *birthDateInfo.ApproximateAge + yearsPassed
+		return fmt.Sprintf("~%d years old", currentApproximateAge)
+	}
+
+	return "Age unknown"
+}
+
 func calculateYearsPassed(from, to time.Time) int {
 	years := to.Year() - from.Year()
 	

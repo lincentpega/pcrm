@@ -1,11 +1,8 @@
 package mappers
 
 import (
-	"time"
-
 	"github.com/lincentpega/pcrm/internal/dto"
 	"github.com/lincentpega/pcrm/internal/models"
-	"github.com/lincentpega/pcrm/internal/services"
 )
 
 func PersonUpsertRequestToDomain(req *dto.PersonUpsertRequest) *models.Person {
@@ -18,13 +15,12 @@ func PersonUpsertRequestToDomain(req *dto.PersonUpsertRequest) *models.Person {
 
 func PersonDomainToResponse(person *models.Person) dto.PersonInfoResponse {
 	return dto.PersonInfoResponse{
-		ID:                 person.ID,
-		FirstName:          person.FirstName,
-		SecondName:         person.SecondName,
-		MiddleName:         person.MiddleName,
-		BirthdateFormatted: services.FormatBirthDateInfo(person),
-		CreatedAt:          person.CreatedAt,
-		UpdatedAt:          person.UpdatedAt,
+		ID:         person.ID,
+		FirstName:  person.FirstName,
+		SecondName: person.SecondName,
+		MiddleName: person.MiddleName,
+		CreatedAt:  person.CreatedAt,
+		UpdatedAt:  person.UpdatedAt,
 	}
 }
 
@@ -56,19 +52,3 @@ func PersonWithContactsDomainToResponse(person *models.Person, contacts []models
 	return response
 }
 
-func PersonBirthdateRequestToDomain(personID int64, req *dto.PersonBirthdateRequest) *models.Person {
-	var approximateAgeUpdatedAt *time.Time
-	if req.ApproximateAge != nil {
-		now := time.Now()
-		approximateAgeUpdatedAt = &now
-	}
-
-	return &models.Person{
-		ID:                      personID,
-		BirthYear:               req.BirthYear,
-		BirthMonth:              req.BirthMonth,
-		BirthDay:                req.BirthDay,
-		ApproximateAge:          req.ApproximateAge,
-		ApproximateAgeUpdatedAt: approximateAgeUpdatedAt,
-	}
-}

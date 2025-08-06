@@ -3,11 +3,6 @@ CREATE TABLE people (
     first_name VARCHAR(255) NOT NULL,
     second_name VARCHAR(255),
     middle_name VARCHAR(255),
-    birth_year INTEGER,
-    birth_month INTEGER CHECK (birth_month >= 1 AND birth_month <= 12),
-    birth_day INTEGER CHECK (birth_day >= 1 AND birth_day <= 31),
-    approximate_age INTEGER,
-    approximate_age_updated_at DATE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -51,3 +46,17 @@ CREATE TABLE connection_sources (
 
 ALTER TABLE connection_sources ADD CONSTRAINT uk_connection_sources_person_id UNIQUE (person_id);
 CREATE INDEX idx_connection_sources_introducer_person_id ON connection_sources(introducer_person_id);
+
+CREATE TABLE birth_date_info (
+    id BIGSERIAL PRIMARY KEY,
+    person_id BIGINT NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+    birth_year INTEGER,
+    birth_month INTEGER CHECK (birth_month >= 1 AND birth_month <= 12),
+    birth_day INTEGER CHECK (birth_day >= 1 AND birth_day <= 31),
+    approximate_age INTEGER,
+    approximate_age_updated_at DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE birth_date_info ADD CONSTRAINT uk_birth_date_info_person_id UNIQUE (person_id);

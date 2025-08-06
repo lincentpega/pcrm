@@ -8,21 +8,13 @@ type PersonUpsertRequest struct {
 	MiddleName *string `json:"middleName,omitempty"`
 }
 
-type PersonBirthdateRequest struct {
-	BirthYear      *int `json:"birthYear,omitempty"`
-	BirthMonth     *int `json:"birthMonth,omitempty"`
-	BirthDay       *int `json:"birthDay,omitempty"`
-	ApproximateAge *int `json:"approximateAge,omitempty"`
-}
-
 type PersonInfoResponse struct {
-	ID                 int64     `json:"id" binding:"required"`
-	FirstName          string    `json:"firstName" binding:"required"`
-	SecondName         *string   `json:"secondName,omitempty"`
-	MiddleName         *string   `json:"middleName,omitempty"`
-	BirthdateFormatted string    `json:"birthdateFormatted"`
-	CreatedAt          time.Time `json:"createdAt" binding:"required"`
-	UpdatedAt          time.Time `json:"updatedAt" binding:"required"`
+	ID         int64     `json:"id" binding:"required"`
+	FirstName  string    `json:"firstName" binding:"required"`
+	SecondName *string   `json:"secondName,omitempty"`
+	MiddleName *string   `json:"middleName,omitempty"`
+	CreatedAt  time.Time `json:"createdAt" binding:"required"`
+	UpdatedAt  time.Time `json:"updatedAt" binding:"required"`
 }
 
 type PersonWithContactsResponse struct {

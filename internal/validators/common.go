@@ -41,43 +41,50 @@ func ParsePaginationParams(pageStr, limitStr string) (int, int) {
 	return page, limit
 }
 
-func ValidateBirthdateRequest(req *dto.PersonBirthdateRequest) error {
-	// Count non-nil fields to determine scenario
-	fieldsSet := 0
-	if req.BirthYear != nil {
-		fieldsSet++
-	}
-	if req.BirthMonth != nil {
-		fieldsSet++
-	}
-	if req.BirthDay != nil {
-		fieldsSet++
-	}
-	if req.ApproximateAge != nil {
-		fieldsSet++
-	}
+func ValidateBirthDateInfoRequest(req *dto.BirthDateInfoRequest) error {
+	hasYear := req.BirthYear != nil
+	hasMonth := req.BirthMonth != nil
+	hasDay := req.BirthDay != nil
+	hasApproximateAge := req.ApproximateAge != nil
 
-	// Scenario 1: Exact date (all date fields present, no approximate age)
-	if req.BirthYear != nil && req.BirthMonth != nil && req.BirthDay != nil && req.ApproximateAge == nil {
+	// Scenario 1: Exact date (year + month + day, no approximate age)
+	if hasYear && hasMonth && hasDay && !hasApproximateAge {
 		return validateExactDate(*req.BirthYear, *req.BirthMonth, *req.BirthDay)
 	}
 
-	// Scenario 2: Partial date (month and day only, no year or approximate age)
-	if req.BirthMonth != nil && req.BirthDay != nil && req.BirthYear == nil && req.ApproximateAge == nil {
+	// Scenario 2: Partial date (month + day only, no year or approximate age)
+	if !hasYear && hasMonth && hasDay && !hasApproximateAge {
 		return validatePartialDate(*req.BirthMonth, *req.BirthDay)
 	}
 
 	// Scenario 3: Approximate age only (no date fields)
-	if req.ApproximateAge != nil && req.BirthYear == nil && req.BirthMonth == nil && req.BirthDay == nil {
+	if !hasYear && !hasMonth && !hasDay && hasApproximateAge {
 		return validateApproximateAge(*req.ApproximateAge)
 	}
 
 	// Scenario 4: Clear all (all fields nil)
-	if fieldsSet == 0 {
+	if !hasYear && !hasMonth && !hasDay && !hasApproximateAge {
 		return nil // Valid - clearing birth date info
 	}
 
-	// Invalid combinations
+	// Invalid combinations - provide specific error messages
+	if hasApproximateAge && (hasYear || hasMonth || hasDay) {
+		return errors.New("approximate age cannot be combined with date fields - use either approximate age alone or date fields without approximate age")
+	}
+
+	if hasYear && !hasMonth {
+		return errors.New("birth year requires both month and day - provide complete date (year+month+day) or partial date (month+day only)")
+	}
+
+	if hasYear && hasMonth && !hasDay {
+		return errors.New("birth year and month require day - provide complete date (year+month+day)")
+	}
+
+	if hasDay && !hasMonth {
+		return errors.New("birth day requires month - provide either partial date (month+day) or complete date (year+month+day)")
+	}
+
+	// Fallback for any other invalid combinations
 	return errors.New("invalid birth date combination - use exact date (year+month+day), partial date (month+day), approximate age only, or clear all fields")
 }
 
