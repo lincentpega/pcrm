@@ -1,4 +1,4 @@
-.PHONY: init run migrate tidy install-air install-swag swagger-gen build
+.PHONY: init run migrate tidy install-air install-swag swagger-gen build test
 
 init: tidy install-air install-swag
 	@echo "Project initialized successfully"
@@ -30,3 +30,7 @@ migrate:
 run: init migrate swagger-gen
 	@echo "Starting application with hot reload..."
 	air
+
+test:
+	@echo "Running tests..."
+	go test ./...
