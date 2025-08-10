@@ -26,13 +26,12 @@ type ContactRequest struct {
 }
 
 type ContactResponse struct {
-	ID            int64                `json:"id"`
-	PersonID      int64                `json:"personId"`
-	ContactTypeID int64                `json:"contactTypeId"`
-	Content       string               `json:"content"`
-	CreatedAt     time.Time            `json:"createdAt"`
-	UpdatedAt     time.Time            `json:"updatedAt"`
-	ContactType   ContactTypeResponse  `json:"contactType"`
+    ID            int64                `json:"id"`
+    PersonID      int64                `json:"personId"`
+    Content       string               `json:"content"`
+    CreatedAt     time.Time            `json:"createdAt"`
+    UpdatedAt     time.Time            `json:"updatedAt"`
+    ContactType   ContactTypeResponse  `json:"contactType"`
 }
 
 type ContactTypeResponse struct {
@@ -50,15 +49,14 @@ func (req *ContactRequest) ToContact(personID int64) *models.Contact {
 }
 
 func ContactToResponse(contact *models.Contact) ContactResponse {
-	return ContactResponse{
-		ID:            contact.ID,
-		PersonID:      contact.PersonID,
-		ContactTypeID: contact.ContactTypeID,
-		Content:       contact.Content,
-		CreatedAt:     contact.CreatedAt,
-		UpdatedAt:     contact.UpdatedAt,
-		ContactType: ContactTypeResponse{
-			ID:        contact.ContactType.ID,
+    return ContactResponse{
+        ID:            contact.ID,
+        PersonID:      contact.PersonID,
+        Content:       contact.Content,
+        CreatedAt:     contact.CreatedAt,
+        UpdatedAt:     contact.UpdatedAt,
+        ContactType: ContactTypeResponse{
+            ID:        contact.ContactType.ID,
 			Name:      contact.ContactType.Name,
 			CreatedAt: contact.ContactType.CreatedAt,
 		},
@@ -118,21 +116,25 @@ func (api *ContactAPI) ListContactsByPerson(w http.ResponseWriter, r *http.Reque
 // @Failure 404 {object} ErrorResponse
 // @Router /api/contacts/{id} [get]
 func (api *ContactAPI) GetContact(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		WriteBadRequest(w, "Invalid contact ID")
-		return
-	}
+    idStr := r.PathValue("id")
+    id, err := strconv.ParseInt(idStr, 10, 64)
+    if err != nil {
+        WriteBadRequest(w, "Invalid contact ID")
+        return
+    }
 
-	contact, err := api.contactRepo.GetByID(id)
-	if err != nil {
-		WriteNotFound(w, "Contact not found")
-		return
-	}
+    contact, err := api.contactRepo.GetByID(id)
+    if err != nil {
+        WriteInternalError(w, "Failed to fetch contact")
+        return
+    }
+    if contact == nil {
+        WriteNotFound(w, "Contact not found")
+        return
+    }
 
-	response := ContactToResponse(contact)
-	WriteSuccess(w, response)
+    response := ContactToResponse(contact)
+    WriteSuccess(w, response)
 }
 
 // CreateContact godoc
@@ -224,11 +226,15 @@ func (api *ContactAPI) UpdateContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existingContact, err := api.contactRepo.GetByID(id)
-	if err != nil {
-		WriteNotFound(w, "Contact not found")
-		return
-	}
+    existingContact, err := api.contactRepo.GetByID(id)
+    if err != nil {
+        WriteInternalError(w, "Failed to fetch contact")
+        return
+    }
+    if existingContact == nil {
+        WriteNotFound(w, "Contact not found")
+        return
+    }
 
 	contact := &models.Contact{
 		ID:            id,
