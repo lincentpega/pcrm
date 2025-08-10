@@ -46,3 +46,6 @@ build-errors.log
 
 # Database data
 postgres_data/
+
+# Binaries
+bin/
