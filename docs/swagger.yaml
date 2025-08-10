@@ -14,8 +14,6 @@ definitions:
     properties:
       contactType:
         $ref: '#/definitions/api.ContactTypeResponse'
-      contactTypeId:
-        type: integer
       content:
         type: string
       createdAt:
@@ -123,6 +121,41 @@ definitions:
         type: string
       wasIntroduced:
         type: boolean
+    type: object
+  dto.ConversationRequest:
+    properties:
+      conversationTypeId:
+        type: integer
+      initiator:
+        type: string
+      notes:
+        type: string
+    type: object
+  dto.ConversationResponse:
+    properties:
+      conversationType:
+        $ref: '#/definitions/dto.ConversationTypeResponse'
+      createdAt:
+        type: string
+      id:
+        type: integer
+      initiator:
+        type: string
+      notes:
+        type: string
+      personId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  dto.ConversationTypeResponse:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
     type: object
   dto.PersonInfoResponse:
     properties:
@@ -282,6 +315,120 @@ paths:
       summary: Update a contact
       tags:
       - contacts
+  /api/conversation-types:
+    get:
+      consumes:
+      - application/json
+      description: Get all available conversation types (phone call, video call, etc.)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ConversationTypeResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: List all conversation types
+      tags:
+      - conversation-types
+  /api/conversations/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a conversation from the system
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Delete a conversation
+      tags:
+      - conversations
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific conversation
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ConversationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Get a conversation by ID
+      tags:
+      - conversations
+    put:
+      consumes:
+      - application/json
+      description: Update an existing conversation's information
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated conversation data
+        in: body
+        name: conversation
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ConversationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ConversationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Update a conversation
+      tags:
+      - conversations
   /api/people:
     get:
       consumes:
@@ -710,4 +857,73 @@ paths:
       summary: Create a new contact
       tags:
       - contacts
+  /api/people/{personId}/conversations:
+    get:
+      consumes:
+      - application/json
+      description: Get all conversations associated with a specific person
+      parameters:
+      - description: Person ID
+        in: path
+        name: personId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ConversationResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: List conversations for a person
+      tags:
+      - conversations
+    post:
+      consumes:
+      - application/json
+      description: Create a new conversation for a specific person
+      parameters:
+      - description: Person ID
+        in: path
+        name: personId
+        required: true
+        type: integer
+      - description: Conversation data
+        in: body
+        name: conversation
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ConversationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ConversationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Create a new conversation
+      tags:
+      - conversations
 swagger: "2.0"

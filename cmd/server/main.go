@@ -50,11 +50,13 @@ func main() {
 	contactRepo := repository.NewContactRepository(db)
 	connectionSourceRepo := repository.NewConnectionSourceRepository(db)
 	birthDateInfoRepo := repository.NewBirthDateInfoRepository(db)
+	conversationRepo := repository.NewConversationRepository(db)
 
 	personAPI := api.NewPersonAPI(personRepo, contactRepo)
 	contactAPI := api.NewContactAPI(contactRepo)
 	connectionSourceAPI := api.NewConnectionSourceAPI(connectionSourceRepo, personRepo)
 	birthDateInfoAPI := api.NewBirthDateInfoAPI(birthDateInfoRepo, personRepo)
+	conversationAPI := api.NewConversationAPI(conversationRepo, personRepo)
 
 	middlewareChain := alice.New(
 		middleware.LoggingMiddleware,
@@ -81,6 +83,13 @@ func main() {
 	mux.HandleFunc("PUT /api/contacts/{id}", contactAPI.UpdateContact)
 	mux.HandleFunc("DELETE /api/contacts/{id}", contactAPI.DeleteContact)
 	mux.HandleFunc("GET /api/contact-types", contactAPI.ListContactTypes)
+
+	mux.HandleFunc("GET /api/people/{personId}/conversations", conversationAPI.ListConversationsByPerson)
+	mux.HandleFunc("POST /api/people/{personId}/conversations", conversationAPI.CreateConversation)
+	mux.HandleFunc("GET /api/conversations/{id}", conversationAPI.GetConversation)
+	mux.HandleFunc("PUT /api/conversations/{id}", conversationAPI.UpdateConversation)
+	mux.HandleFunc("DELETE /api/conversations/{id}", conversationAPI.DeleteConversation)
+	mux.HandleFunc("GET /api/conversation-types", conversationAPI.ListConversationTypes)
 
 	mux.HandleFunc("GET /api/people/{personId}/connection-source", connectionSourceAPI.GetConnectionSource)
 	mux.HandleFunc("PUT /api/people/{personId}/connection-source", connectionSourceAPI.UpsertConnectionSource)
