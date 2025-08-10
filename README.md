@@ -1,87 +1,96 @@
-# Personal CRM
+# Personal CRM Backend API
 
-A simple, modern personal CRM application built with Go and HTMX, focused on server-side rendering and minimal dependencies.
+A minimal personal CRM backend built with Go. It focuses on clean boundaries (DTOs, validators, mappers, repositories) and minimal dependencies while exposing a typed REST API with Swagger docs.
 
 ## Features
 
-- **Person Management**: Add, view, edit, and delete personal contacts
-- **Contact Information**: Store multiple contact methods (email, phone, social media)
-- **Pagination**: Navigate through large contact lists efficiently
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Real-time Updates**: Dynamic interactions powered by HTMX
+- **People**: Create, read, update, delete people
+- **Contacts**: Store multiple contact methods and list available contact types
+- **Connection Source**: Track how you met a person (meeting story, introducer)
+- **Birth Date Info**: Store exact/partial birth date or approximate age
+- **Conversations**: Log interactions with type, initiator, and notes; list conversation types
+- **Pagination**: Basic pagination for people list
+- **OpenAPI**: Swagger UI available under `/swagger`
 
 ## Technology Stack
 
-- **Backend**: Go 1.23+ with built-in `net/http` routing
-- **Frontend**: HTMX for dynamic interactions
-- **Templates**: `html/template` for server-side rendering
-- **Database**: PostgreSQL with `sqlx` for type-safe queries
-- **Migrations**: `golang-migrate` for database schema management
-- **Styling**: Custom CSS with responsive design
-- **Development**: Docker + Docker Compose with hot reload
+- **Backend**: Go 1.23.x using `net/http` (1.22+ patterns)
+- **Database**: PostgreSQL with `sqlx`
+- **Migrations**: `golang-migrate`
+- **Middleware**: `alice`
+- **Configuration**: YAML (`config.yml`)
+- **Development**: Docker + Docker Compose
 
 ## Quick Start
 
 ### Prerequisites
 
-- Go 1.24.x or later
+- Go 1.23.x
 - Docker and Docker Compose
-- golang-migrate CLI tool
+- `golang-migrate` CLI
 
-### Running the Application
+### Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/lincentpega/pcrm.git
-   cd pcrm
-   ```
+1) Start PostgreSQL:
+```bash
+docker compose up -d postgres
+```
 
-2. Start the development environment:
-   ```bash
-   make dev
-   ```
+2) Apply migrations:
+```bash
+make migrate
+```
 
-3. The application will be available at `http://localhost:8080`
+3) Work on the codebase:
+- App runs with air hot reload during development (assume it’s already running)
+- Use `make build` to verify compilation and generate Swagger
+- Use `make test` to run tests
 
-### Available Commands
+### Make Commands
 
 ```bash
-make dev          # Start development environment with hot reload
-make build        # Build the application
+make init         # Install dev tools and tidy modules
+make tidy         # Tidy go.mod/go.sum
+make swagger-gen  # Generate Swagger docs (docs/)
+make build        # Build production binary to bin/server
 make test         # Run tests
-make migrate-up   # Run database migrations
-make migrate-down # Rollback database migrations
+make migrate      # Run DB migrations
 ```
 
 ## Project Structure
 
 ```
 pcrm/
-├── cmd/server/           # Application entrypoint
+├── cmd/
+│   └── server/            # Application entrypoint
 ├── internal/
-│   ├── config/           # Configuration management
-│   ├── handlers/         # HTTP handlers
-│   ├── middleware/       # HTTP middleware
-│   ├── models/           # Data models
-│   ├── repository/       # Database operations
-│   └── templates/        # HTML templates
-├── migrations/           # Database migrations
-├── static/              # Static assets (CSS, JS, images)
-├── docker-compose.yml   # Development infrastructure
-└── config.yml          # Application configuration
+│   ├── config/            # Configuration management
+│   ├── dto/               # API contracts (request/response structures)
+│   ├── handlers/          # HTTP handlers (orchestration layer)
+│   ├── mappers/           # Data transformation between layers
+│   ├── middleware/        # HTTP middleware
+│   ├── models/            # Domain models
+│   ├── repository/        # Database operations
+│   └── validators/        # Input validation logic
+├── migrations/            # Database migrations
+├── docker-compose.yml     # Development infrastructure
+└── config.yml             # Application configuration
 ```
 
-## Key Design Decisions
+## API
 
-- **Server-side rendering**: Uses HTMX + html/template for dynamic UI without heavy JavaScript
-- **Minimal dependencies**: Prefers Go standard library where possible
-- **Simple architecture**: Avoids over-engineering patterns for this scale
-- **Type safety**: Uses sqlx for compile-time query validation
-- **Clean styling**: Light black theme with responsive design
+- Swagger UI: `GET /swagger`
+- People: `GET/POST /api/people`, `GET/PUT/DELETE /api/people/{id}`
+- Contacts: `GET /api/people/{personId}/contacts`, `POST /api/people/{personId}/contacts`, `GET/PUT/DELETE /api/contacts/{id}`, `GET /api/contact-types`
+- Connection Source: `GET/PUT/DELETE /api/people/{personId}/connection-source`
+- Birth Date Info: `GET/PUT/DELETE /api/people/{personId}/birth-date-info`
+- Conversations: `GET /api/people/{personId}/conversations`, `POST /api/people/{personId}/conversations`, `GET/PUT/DELETE /api/conversations/{id}`, `GET /api/conversation-types`
 
-## Development
+## Notes
 
-The application uses Docker Compose for a consistent development environment. Database changes must go through migrations, and templates are organized by feature/page.
+- All database changes must go through migrations
+- Error messages do not end with a period
+- Prefer explicit error handling over panics
 
 ## License
 
